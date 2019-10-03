@@ -13,7 +13,7 @@ pv = [str(x) for x in PICARD_VERSION]
 macos_picard_version = '.'.join(pv[:3])
 macos_picard_short_version = macos_picard_version
 if pv[3] != 'final':
-	macos_picard_version += pv[3][0] + ''.join(pv[4:])
+    macos_picard_version += pv[3][0] + ''.join(pv[4:])
 
 
 def _picard_get_locale_files():
@@ -89,7 +89,8 @@ pyz = PYZ(a.pure, a.zipped_data,
 exe = EXE(pyz,
           a.scripts,
           exclude_binaries=True,
-          name='picard',
+          # Avoid name clash between picard executable and picard module folder
+          name='picard' if os_name == 'Windows' else 'picard-run',
           debug=False,
           strip=False,
           upx=False,
@@ -116,6 +117,7 @@ if os_name == 'Darwin':
         'CFBundleIdentifier': PICARD_APP_ID,
         'CFBundleVersion': macos_picard_version,
         'CFBundleShortVersionString': macos_picard_short_version,
+        'LSMinimumSystemVersion': '10.12',
     }
     app = BUNDLE(coll,
                  name='MusicBrainz Picard.app',

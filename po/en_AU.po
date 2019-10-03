@@ -3,23 +3,22 @@
 # This file is distributed under the same license as the picard project.
 # 
 # Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2009
-# Katarina Kovač <music.addict136@gmail.com>, 2014
-# Никола Крстевски <nikola.krstevski@gmail.com>, 2015
+# Ivan Dobsky, 2019
+# Philipp Wolfer <ph.wolfer@gmail.com>, 2019
 msgid ""
 msgstr ""
 "Project-Id-Version: MusicBrainz\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2019-09-26 10:11+0200\n"
-"PO-Revision-Date: 2019-09-26 13:55+0000\n"
-"Last-Translator: Никола Крстевски <nikola.krstevski@gmail.com>\n"
-"Language-Team: Serbian (http://www.transifex.com/musicbrainz/musicbrainz/language/sr/)\n"
+"PO-Revision-Date: 2019-09-26 15:45+0000\n"
+"Last-Translator: Ivan Dobsky\n"
+"Language-Team: English (Australia) (http://www.transifex.com/musicbrainz/musicbrainz/language/en_AU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.7.0\n"
-"Language: sr\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: en_AU\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: picard/album.py:112
 msgid "Unmatched Files"
@@ -50,7 +49,6 @@ msgid "; %i image"
 msgid_plural "; %i images"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: picard/album.py:629
 #, python-format
@@ -58,7 +56,6 @@ msgid "; %i image not in all tracks"
 msgid_plural "; %i different images among tracks"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: picard/cluster.py:205
 #, python-format
@@ -85,7 +82,6 @@ msgid "Added %(count)i release to collection \"%(name)s\""
 msgid_plural "Added %(count)i releases to collection \"%(name)s\""
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: picard/collection.py:81
 #, python-format
@@ -93,7 +89,6 @@ msgid "Removed %(count)i release from collection \"%(name)s\""
 msgid_plural "Removed %(count)i releases from collection \"%(name)s\""
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: picard/collection.py:92
 #, python-format
@@ -183,36 +178,36 @@ msgstr ""
 
 #: picard/releasegroup.py:58 picard/ui/searchdialog/album.py:153
 msgid "Tracks"
-msgstr "Песме"
+msgstr ""
 
 #: picard/releasegroup.py:59
 msgid "Year"
-msgstr "Година"
+msgstr ""
 
 #: picard/releasegroup.py:60 picard/ui/cdlookup.py:60
 #: picard/ui/searchdialog/album.py:155 picard/ui/searchdialog/track.py:66
 msgid "Country"
-msgstr "Држава"
+msgstr ""
 
 #: picard/releasegroup.py:61 picard/ui/searchdialog/album.py:152
 msgid "Format"
-msgstr "Формат"
+msgstr ""
 
 #: picard/releasegroup.py:62
 msgid "Label"
-msgstr "Издавачка кућа"
+msgstr ""
 
 #: picard/releasegroup.py:63
 msgid "Cat No"
-msgstr "Кат. бр."
+msgstr ""
 
 #: picard/releasegroup.py:95
 msgid "[no barcode]"
-msgstr "[нема баркода]"
+msgstr ""
 
 #: picard/releasegroup.py:109
 msgid "[no release info]"
-msgstr "[нема информације о дистрибуцији]"
+msgstr ""
 
 #: picard/tagger.py:289 picard/ui/ui_options_general.py:135
 msgid "MusicBrainz Account"
@@ -226,18 +221,17 @@ msgstr ""
 #, python-format
 msgid "Adding %(count)d file from '%(directory)s' ..."
 msgid_plural "Adding %(count)d files from '%(directory)s' ..."
-msgstr[0] "Додавање %(count)d датотека из '%(directory)s' ..."
-msgstr[1] "Додавање %(count)d датотека из '%(directory)s' ..."
-msgstr[2] "Додавање %(count)d датотека из '%(directory)s' ..."
+msgstr[0] ""
+msgstr[1] ""
 
 #: picard/tagger.py:729
 #, python-format
 msgid "Removing album %(id)s: %(artist)s - %(album)s"
-msgstr "Уклањање албума %(id)s: %(artist)s - %(album)s"
+msgstr ""
 
 #: picard/tagger.py:747
 msgid "CD Lookup Error"
-msgstr "Грешка при налажењу CD-а"
+msgstr ""
 
 #: picard/tagger.py:748
 #, python-format
@@ -245,7 +239,7 @@ msgid ""
 "Error while reading CD:\n"
 "\n"
 "%s"
-msgstr "Грешка при учитавању CD-а:\n\n%s"
+msgstr ""
 
 #: picard/track.py:333
 msgid "[loading recording information]"
@@ -312,31 +306,31 @@ msgstr ""
 
 #: picard/const/languages.py:25
 msgid "Arabic"
-msgstr "Арапско"
+msgstr ""
 
 #: picard/const/languages.py:28
 msgid "Catalan"
-msgstr "Каталонски"
+msgstr ""
 
 #: picard/const/languages.py:29
 msgid "Czech"
-msgstr "Чешки"
+msgstr ""
 
 #: picard/const/languages.py:31
 msgid "Danish"
-msgstr "Дански"
+msgstr ""
 
 #: picard/const/languages.py:32
 msgid "German"
-msgstr "Немачки"
+msgstr ""
 
 #: picard/const/languages.py:33
 msgid "Greek"
-msgstr "Грчки"
+msgstr ""
 
 #: picard/const/languages.py:34
 msgid "English"
-msgstr "Енглески"
+msgstr ""
 
 #: picard/const/languages.py:35
 msgid "English (Australia)"
@@ -344,27 +338,27 @@ msgstr ""
 
 #: picard/const/languages.py:36
 msgid "English (Canada)"
-msgstr "Енглески (Канада)"
+msgstr ""
 
 #: picard/const/languages.py:37
 msgid "English (UK)"
-msgstr "Енглески (УК)"
+msgstr ""
 
 #: picard/const/languages.py:39
 msgid "Spanish"
-msgstr "Шпански"
+msgstr ""
 
 #: picard/const/languages.py:40
 msgid "Estonian"
-msgstr "Естонски"
+msgstr ""
 
 #: picard/const/languages.py:42
 msgid "Finnish"
-msgstr "Фински"
+msgstr ""
 
 #: picard/const/languages.py:44
 msgid "French"
-msgstr "Француски"
+msgstr ""
 
 #: picard/const/languages.py:45
 msgid "French (Canada)"
@@ -376,23 +370,23 @@ msgstr ""
 
 #: picard/const/languages.py:48
 msgid "Hebrew"
-msgstr "Хебрејски"
+msgstr ""
 
 #: picard/const/languages.py:52
 msgid "Icelandic"
-msgstr "Исландски"
+msgstr ""
 
 #: picard/const/languages.py:53
 msgid "Italian"
-msgstr "Италијански"
+msgstr ""
 
 #: picard/const/languages.py:54
 msgid "Japanese"
-msgstr "Јапански"
+msgstr ""
 
 #: picard/const/languages.py:56
 msgid "Korean"
-msgstr "Корејски"
+msgstr ""
 
 #: picard/const/languages.py:58
 msgid "Norwegian Bokmal"
@@ -400,7 +394,7 @@ msgstr ""
 
 #: picard/const/languages.py:60
 msgid "Dutch"
-msgstr "Холандски"
+msgstr ""
 
 #: picard/const/languages.py:61
 msgid "Occitan"
@@ -408,43 +402,43 @@ msgstr ""
 
 #: picard/const/languages.py:62
 msgid "Polish"
-msgstr "Пољски"
+msgstr ""
 
 #: picard/const/languages.py:63
 msgid "Portuguese"
-msgstr "Португалски"
+msgstr ""
 
 #: picard/const/languages.py:64
 msgid "Brazilian Portuguese"
-msgstr "Бразилски португалски"
+msgstr ""
 
 #: picard/const/languages.py:65
 msgid "Romanian"
-msgstr "Румунски"
+msgstr ""
 
 #: picard/const/languages.py:66
 msgid "Russian"
-msgstr "Руски"
+msgstr ""
 
 #: picard/const/languages.py:68
 msgid "Slovak"
-msgstr "Словачки"
+msgstr ""
 
 #: picard/const/languages.py:69
 msgid "Slovenian"
-msgstr "Словеначки"
+msgstr ""
 
 #: picard/const/languages.py:71
 msgid "Swedish"
-msgstr "Шведски"
+msgstr ""
 
 #: picard/const/languages.py:73
 msgid "Turkish"
-msgstr "Турски"
+msgstr ""
 
 #: picard/const/languages.py:74
 msgid "Ukrainian"
-msgstr "Украјински"
+msgstr ""
 
 #: picard/const/languages.py:75
 msgid "Chinese (China)"
@@ -565,7 +559,7 @@ msgstr ""
 
 #: picard/ui/cdlookup.py:61 picard/ui/searchdialog/album.py:157
 msgid "Catalog #s"
-msgstr ""
+msgstr "Catalogue #s"
 
 #: picard/ui/cdlookup.py:61 picard/ui/searchdialog/album.py:158
 #: picard/util/tags.py:79
@@ -582,7 +576,6 @@ msgid "%s (%i release)"
 msgid_plural "%s (%i releases)"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: picard/ui/colors.py:33
 msgid "Errored entity"
@@ -771,7 +764,6 @@ msgid "%i file in this track"
 msgid_plural "%i files in this track"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: picard/ui/infodialog.py:345
 msgid "Cluster Info"
@@ -824,7 +816,7 @@ msgstr ""
 
 #: picard/ui/itemviews.py:196
 msgid "Ok match"
-msgstr ""
+msgstr "OK match"
 
 #: picard/ui/itemviews.py:197
 msgid "Good match"
@@ -1000,7 +992,6 @@ msgid_plural ""
 "There are %d unsaved files. Closing Picard will lose all unsaved changes."
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: picard/ui/mainwindow.py:233
 msgid "&Quit Picard"
@@ -1326,7 +1317,7 @@ msgstr ""
 
 #: picard/ui/mainwindow.py:691 picard/ui/ui_options_plugins.py:132
 msgid "Actions"
-msgstr "Акције"
+msgstr ""
 
 #: picard/ui/mainwindow.py:734
 msgid "Track"
@@ -1400,7 +1391,6 @@ msgid "(different across %d item)"
 msgid_plural "(different across %d items)"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: picard/ui/metadatabox.py:104
 #, python-format
@@ -1408,7 +1398,6 @@ msgid "(missing from %d item)"
 msgid_plural "(missing from %d items)"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: picard/ui/metadatabox.py:194
 msgid "metadata view"
@@ -1467,7 +1456,6 @@ msgid "Use Original Value"
 msgid_plural "Use Original Values"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: picard/ui/passworddialog.py:35
 #, python-format
@@ -1870,7 +1858,7 @@ msgstr ""
 
 #: picard/ui/ui_options_interface.py:132
 msgid "Customize Action Toolbar"
-msgstr ""
+msgstr "Customise Action Toolbar"
 
 #: picard/ui/ui_options_interface.py:133
 msgid "Add a new button to Toolbar"
@@ -1899,7 +1887,7 @@ msgstr ""
 #: picard/ui/options/interface_colors.py:82
 #: picard/ui/ui_options_interface_colors.py:48
 msgid "Colors"
-msgstr ""
+msgstr "Colours"
 
 #: picard/ui/ui_options_matching.py:69
 msgid "Thresholds"
@@ -1927,11 +1915,11 @@ msgstr ""
 
 #: picard/ui/ui_options_metadata.py:98
 msgid "Use standardized artist names"
-msgstr ""
+msgstr "Use standardised artist names"
 
 #: picard/ui/ui_options_metadata.py:99
 msgid "Use standardized instrument and vocal credits"
-msgstr ""
+msgstr "Use standardised instrument and vocal credits"
 
 #: picard/ui/ui_options_metadata.py:100
 msgid "Convert Unicode punctuation characters to ASCII"
@@ -2244,7 +2232,7 @@ msgstr ""
 
 #: picard/ui/util.py:41
 msgid "&Ok"
-msgstr ""
+msgstr "&OK"
 
 #: picard/ui/util.py:44
 msgid "Clos&e"
@@ -2256,11 +2244,11 @@ msgstr ""
 
 #: picard/ui/options/about.py:34
 msgid "About"
-msgstr "О"
+msgstr ""
 
 #: picard/ui/options/about.py:54
 msgid "translator-credits"
-msgstr "Launchpad Contributions:\n  Philipp Wolfer https://launchpad.net/~phw\n  Мирослав Николић https://launchpad.net/~lipek"
+msgstr ""
 
 #: picard/ui/options/about.py:57
 #, python-format
@@ -2468,17 +2456,17 @@ msgstr ""
 
 #: picard/ui/options/interface_colors.py:57
 msgid "Choose a color"
-msgstr ""
+msgstr "Choose a colour"
 
 #: picard/ui/options/interface_colors.py:136
 msgid "Colors changed"
-msgstr ""
+msgstr "Colours changed"
 
 #: picard/ui/options/interface_colors.py:137
 msgid ""
 "You have changed the interface colors. You may have to restart Picard in "
 "order for the changes to take effect."
-msgstr ""
+msgstr "You have changed the interface colours. You may have to restart Picard in order for the changes to take effect."
 
 #: picard/ui/options/matching.py:32
 msgid "Matching"
@@ -2561,7 +2549,7 @@ msgstr ""
 
 #: picard/ui/options/plugins.py:583 picard/util/tags.py:44
 msgid "License"
-msgstr ""
+msgstr "Licence"
 
 #: picard/ui/options/plugins.py:620
 #, python-format
@@ -3048,7 +3036,7 @@ msgstr ""
 
 #: picard/util/tags.py:80
 msgid "Catalog Number"
-msgstr ""
+msgstr "Catalogue Number"
 
 #: picard/util/tags.py:81
 msgid "DJ-Mixer"
