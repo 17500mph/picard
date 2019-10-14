@@ -64,7 +64,6 @@ from picard.ui.item import Item
 
 
 class File(QtCore.QObject, Item):
-
     metadata_images_changed = QtCore.pyqtSignal()
 
     NAME = None
@@ -228,7 +227,7 @@ class File(QtCore.QObject, Item):
             # https://docs.python.org/3/library/os.html#os.utime
             # Since Python 3.3, ns parameter is available
             # The best way to preserve exact times is to use the st_atime_ns and st_mtime_ns
-            # fields from the os.stat() result object with the ns parameter to utime.
+            #  fields from the os.stat() result object with the ns parameter to utime.
             st = os.stat(filename)
         except OSError as why:
             errmsg = "Couldn't read timestamps from %r: %s" % (filename, why)
@@ -260,7 +259,7 @@ class File(QtCore.QObject, Item):
                     self._preserve_times(old_filename, save)
                 except self.PreserveTimesStatError as why:
                     log.warning(why)
-                    # we didn't save the file yet, bail out
+                    #  we didn't save the file yet, bail out
                     return None
                 except self.FilePreserveTimesUtimeError as why:
                     log.warning(why)
@@ -427,19 +426,48 @@ class File(QtCore.QObject, Item):
         if old_filename == new_filename + ext:
             return old_filename
 
-        new_dirname = os.path.dirname(new_filename)
-        if not os.path.isdir(new_dirname):
-            os.makedirs(new_dirname)
-        tmp_filename = new_filename
-        i = 1
-        while (not pathcmp(old_filename, new_filename + ext)
-               and os.path.exists(new_filename + ext)):
-            new_filename = "%s (%d)" % (tmp_filename, i)
-            i += 1
+        tmp_directory, tmp_filename = os.path.split(new_filename)
+        new_directory = tmp_directory
+        i = 0
+        file_found = True
+        while not pathcmp(old_filename, new_filename + ext) and file_found:
+            if not os.path.isdir(new_directory):
+                os.makedirs(new_directory)
+
+            if os.path.exists(new_filename + ext):
+                i += 1
+                new_directory = "%s (%d)" % (tmp_directory, i)
+                new_filename = os.path.join(new_directory, tmp_filename)
+            else:
+                file_found = False
+
         new_filename = new_filename + ext
         log.debug("Moving file %r => %r", old_filename, new_filename)
         shutil.move(old_filename, new_filename)
         return new_filename
+
+    ############ Original Code #############
+    #    def _rename(self, old_filename, metadata):
+    #        new_filename, ext = os.path.splitext(
+    #            self.make_filename(old_filename, metadata))
+    #
+    #        if old_filename == new_filename + ext:
+    #            return old_filename
+    #
+    #        new_dirname = os.path.dirname(new_filename)
+    #        if not os.path.isdir(new_dirname):
+    #            os.makedirs(new_dirname)
+    #        tmp_filename = new_filename
+    #        i = 1
+    #        while (not pathcmp(old_filename, new_filename + ext)
+    #               and os.path.exists(new_filename + ext)):
+    #            new_filename = "%s (%d)" % (tmp_filename, i)
+    #            i += 1
+    #        new_filename = new_filename + ext
+    #        log.debug("Moving file %r => %r", old_filename, new_filename)
+    #        shutil.move(old_filename, new_filename)
+    #        return new_filename~
+    ############# Original Code #############
 
     def _save_images(self, dirname, metadata):
         """Save the cover images to disk."""
@@ -459,7 +487,7 @@ class File(QtCore.QObject, Item):
         new_path = os.path.dirname(new_filename)
         old_path = os.path.dirname(old_filename)
         if new_path == old_path:
-            # skip, same directory, nothing to move
+            #  skip, same directory, nothing to move
             return
         patterns = config.setting["move_additional_files_pattern"]
         pattern_regexes = set()

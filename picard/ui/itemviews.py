@@ -122,6 +122,9 @@ class MainPanel(QtWidgets.QSplitter):
 
     columns = [
         (N_('Title'), 'title'),
+        (N_('Qty. Art'), 'artcount'),
+        (N_('Matched'), 'matchedtracks'),
+        (N_('Tracks'), 'albumtracks'),
         (N_('Length'), '~length'),
         (N_('Artist'), 'artist'),
     ]

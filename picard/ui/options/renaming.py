@@ -239,25 +239,32 @@ class RenamingOptionsPage(OptionsPage):
 #        self.ui.file_naming_format.setCursorPosition(0)
 
     def example_1(self):
-        file = File("ticket_to_ride.mp3")
+        file = File("Ticket_to_Ride.mp3")
         file.state = File.NORMAL
         file.metadata['album'] = 'Help!'
-        file.metadata['title'] = 'Ticket to Ride'
         file.metadata['artist'] = 'The Beatles'
-        file.metadata['artistsort'] = 'Beatles, The'
+        file.metadata['title'] = 'Ticket to Ride'
+        file.metadata['date'] = '1965-08-06'
         file.metadata['albumartist'] = 'The Beatles'
-        file.metadata['albumartistsort'] = 'Beatles, The'
         file.metadata['tracknumber'] = '7'
         file.metadata['totaltracks'] = '14'
-        file.metadata['discnumber'] = '1'
         file.metadata['totaldiscs'] = '1'
-        file.metadata['date'] = '1965-08-06'
+        file.metadata['discnumber'] = '1'
+        file.metadata['artistsort'] = 'Beatles, The'
+        file.metadata['albumartistsort'] = 'Beatles, The'
+        file.metadata['media'] = 'Vinyl'
+        file.metadata['label'] = 'Apple Records'
         file.metadata['releasetype'] = ['album', 'soundtrack']
         file.metadata['~primaryreleasetype'] = ['album']
         file.metadata['~secondaryreleasetype'] = ['soundtrack']
-        file.metadata['releasestatus'] = 'official'
+        file.metadata['releasestatus'] = 'Official'
+        file.metadata['catalognumber'] = 'M8541'
         file.metadata['releasecountry'] = 'US'
         file.metadata['~extension'] = 'mp3'
+        file.metadata['~length'] = '4_20'
+        file.metadata['bitrate'] = '256.0'
+        file.metadata['sample_rate'] = '44100'
+        file.metadata['channels'] = '2'
         file.metadata['musicbrainz_albumid'] = '2c053984-4645-4699-9474-d2c35c227028'
         file.metadata['musicbrainz_albumartistid'] = 'b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d'
         file.metadata['musicbrainz_artistid'] = 'b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d'
@@ -266,28 +273,34 @@ class RenamingOptionsPage(OptionsPage):
         return file
 
     def example_2(self):
-        file = File("track05.mp3")
+        file = File("Classical_Crass.mp3")
         file.state = File.NORMAL
-        file.metadata['album'] = "Coup d'État, Volume 1: Ku De Ta / Prologue"
-        file.metadata['title'] = "I've Got to Learn the Mambo"
-        file.metadata['artist'] = "Snowboy feat. James Hunter"
-        file.metadata['artistsort'] = "Snowboy feat. Hunter, James"
+        file.metadata['album'] = "Compilation Album"
+        file.metadata['title'] = "Track Title"
+        file.metadata['artist'] = "Artist feat. Last, First"
+        file.metadata['artistsort'] = "Artist feat. First, Last"
         file.metadata['albumartist'] = config.setting['va_name']
         file.metadata['albumartistsort'] = config.setting['va_name']
+        file.metadata['media'] = 'Vinyl'
         file.metadata['tracknumber'] = '5'
         file.metadata['totaltracks'] = '13'
         file.metadata['discnumber'] = '2'
         file.metadata['totaldiscs'] = '2'
-        file.metadata['discsubtitle'] = "Beat Up"
+        file.metadata['label'] = 'Bootleg Records'
+        file.metadata['discsubtitle'] = "Disc Subtitle"
         file.metadata['date'] = '2005-07-04'
         file.metadata['releasetype'] = ['album', 'compilation']
         file.metadata['~primaryreleasetype'] = 'album'
         file.metadata['~secondaryreleasetype'] = 'compilation'
-        file.metadata['releasestatus'] = 'official'
+        file.metadata['releasestatus'] = 'Release Status'
         file.metadata['releasecountry'] = 'AU'
+        file.metadata['~extension'] = 'mp3'
+        file.metadata['~length'] = '10_40'
+        file.metadata['bitrate'] = '256.0'
+        file.metadata['sample_rate'] = '44100'
+        file.metadata['channels'] = '2'
         file.metadata['compilation'] = '1'
         file.metadata['~multiartist'] = '1'
-        file.metadata['~extension'] = 'mp3'
         file.metadata['musicbrainz_albumid'] = '4b50c71e-0a07-46ac-82e4-cb85dc0c9bdd'
         file.metadata['musicbrainz_recordingid'] = 'b3c487cb-0e55-477d-8df3-01ec6590f099'
         file.metadata['musicbrainz_releasetrackid'] = 'f8649a05-da39-39ba-957c-7abf8f9012be'

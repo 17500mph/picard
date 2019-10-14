@@ -62,8 +62,8 @@ if os_name == 'Windows':
     ]
     data_files.append((os.path.join('resources', 'win10', '*'), '.'))
 
-if os_name == 'Darwin':
-    binaries += [('libdiscid.0.dylib', '.')]
+#if os_name == 'Darwin':
+#    binaries += [('libdiscid.0.dylib', '.')]
 
 if os.path.isfile(fpcalc_name):
     binaries += [(fpcalc_name, '.')]
