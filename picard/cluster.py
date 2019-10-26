@@ -170,9 +170,28 @@ class Cluster(QtCore.QObject, Item):
     def is_album_like(self):
         return True
 
+#
+#   columns = [
+#        (N_('Title'), 'title'),
+#        (N_('Qty. Art'), 'artcount'),
+#        (N_('Matched'), 'matchedtracks'),
+#        (N_('Tracks'), 'albumtracks'),
+#        (N_('Length'), '~length'),
+#        (N_('Artist'), 'artist'),
+#        (N_('Cat #'), 'catalognumber'),
+#        (N_('Media'), 'media'),
+#    ]
+
+
+
     def column(self, column):
         if column == 'title':
-            return '%s (%d)' % (self.metadata['album'], len(self.files))
+            return '%s' % (self.metadata['album'])
+
+        elif column == 'matchedtracks':
+            return '%d' % (len(self.files))
+        elif column == 'albumtracks':
+            return self.metadata['albumtracks']
         elif (column == '~length' and self.special) or column == 'album':
             return ''
         elif column == '~length':

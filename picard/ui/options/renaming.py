@@ -237,7 +237,7 @@ class RenamingOptionsPage(OptionsPage):
     def set_file_naming_format_default(self):
         self.ui.file_naming_format.setText(self.options[3].default)
 #        self.ui.file_naming_format.setCursorPosition(0)
-
+# amd: Added Addtional example data for column population.
     def example_1(self):
         file = File("Ticket_to_Ride.mp3")
         file.state = File.NORMAL

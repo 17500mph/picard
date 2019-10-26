@@ -97,11 +97,11 @@ class Ui_ReleasesOptionsPage(object):
 
     def retranslateUi(self, ReleasesOptionsPage):
         _translate = QtCore.QCoreApplication.translate
-        self.type_group.setTitle(_("Preferred release types"))
-        self.country_group.setTitle(_("Preferred release countries"))
+        self.type_group.setTitle(_("Less Preference << Preferred Release Types >> More Preference"))
+        self.country_group.setTitle(_("Move Preferred Release Countries to the right"))
         self.add_countries.setText(_(">"))
         self.remove_countries.setText(_("<"))
-        self.format_group.setTitle(_("Preferred release formats"))
+        self.format_group.setTitle(_("Move Preferred Release Formats to the right"))
         self.add_formats.setText(_(">"))
         self.remove_formats.setText(_("<"))
 

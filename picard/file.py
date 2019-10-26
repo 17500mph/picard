@@ -445,7 +445,12 @@ class File(QtCore.QObject, Item):
         log.debug("Moving file %r => %r", old_filename, new_filename)
         shutil.move(old_filename, new_filename)
         return new_filename
-
+    #amd: Added change of duplicate file handling - Moved appended (#) from filename to directory level.
+    #   In effect produces automatic duplicate handling as there will not be two copies of the same Renaming Script
+    #   result in any directory. **Depending on detail of file naming structure. More detailed file names may result
+    #   in similarly, but not identically named files in the output directory. e.g., there will -never- be more than
+    #   a single file that fits the criteria of the naming script settings applied across ALL files, prior and
+    #   newly being added to that target output path. **
     ############ Original Code #############
     #    def _rename(self, old_filename, metadata):
     #        new_filename, ext = os.path.splitext(

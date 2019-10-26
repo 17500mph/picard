@@ -114,17 +114,19 @@ def pathcmp(a, b):
 
 def format_time(ms, display_zero=False):
     """Formats time in milliseconds to a string representation."""
+    """amd: Format time code with 00h:00m:00s instead of 00:00 ."""
+
     ms = float(ms)
     if ms == 0 and not display_zero:
-        return "?:??"
+        return "?m??s"
     duration_seconds = round(ms / 1000)
     if duration_seconds < 3600:
         minutes, seconds = divmod(duration_seconds, 60)
-        return "%d:%02d" % (minutes, seconds)
+        return "%dm%02ds" % (minutes, seconds)
     else:
         hours, remainder = divmod(duration_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
-        return "%d:%02d:%02d" % (hours, minutes, seconds)
+        return "%dh%02dm%02ds" % (hours, minutes, seconds)
 
 
 def sanitize_date(datestr):

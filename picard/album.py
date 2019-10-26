@@ -630,6 +630,12 @@ class Album(DataObject, Item):
             else:
                 return title
 
+        elif column == 'catalognumber':
+            return self.metadata['catalognumber']
+
+        elif column == 'media':
+            return self.metadata['media']
+
         elif column == '~length':
             length = self.metadata.length
             if length:
@@ -648,6 +654,14 @@ class Album(DataObject, Item):
                 text = '%d' % (len(self.tracks))
                 # text = '%d' % (linked_tracks)
                 return text
+
+        elif column == '~completed':
+            trackcount = len(self.tracks)
+            if not trackcount:
+                return ''
+            return '{:03.0f}%'.format(self.get_num_matched_tracks() / trackcount * 100)
+
+
 
         elif column == 'artcount':
             # CoverArt.set_metadata uses the orig_metadata.images if metadata.images is empty
@@ -671,9 +685,6 @@ class Album(DataObject, Item):
 
                 return text
 
-#        elif column == 'album':
-#            return self.metadata['album']
-
         elif column == 'artist':
             return self.metadata['albumartist']
 
@@ -695,10 +706,21 @@ class Album(DataObject, Item):
                     text += ' (%d*)' % (unsaved,)
                 return text
 
+#        elif column == 'album':
+#            return self.metadata['album']
+
+#        elif column == 'format':
+#            return self.metadata['format']
+
+#        elif column == 'extension':
+ #           return self.metadata['extension']
+
         else:
             return ''
 
-#
+
+
+# amd: Visible Columns 0 vs. what's in the Plugin Wedge. (Columns populated on both panes are coded, others are left to the plugin for now..
 #            unmatched = self.get_num_unmatched_files()
 #            if unmatched:
 #                text += '; %d?' % (unmatched,)

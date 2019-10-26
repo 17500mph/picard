@@ -4284,7 +4284,7 @@ msgstr ""
 
 #: ../picard/ui/ui_options_metadata.py:260
 msgid "Release titles"
-msgstr ""
+msgstr "Release Titles"
 
 #: ../picard/ui/ui_options_metadata.py:261
 msgid "Artist names"

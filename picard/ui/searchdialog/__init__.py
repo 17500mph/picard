@@ -51,7 +51,7 @@ class ResultTable(QtWidgets.QTableWidget):
         super().__init__(0, len(column_titles), parent)
         self.setHorizontalHeaderLabels(column_titles)
         self.setSelectionMode(
-            QtWidgets.QAbstractItemView.SingleSelection)
+            QtWidgets.QAbstractItemView.MultiSelection)
         self.setSelectionBehavior(
             QtWidgets.QAbstractItemView.SelectRows)
         self.setEditTriggers(

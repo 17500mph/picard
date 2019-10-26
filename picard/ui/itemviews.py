@@ -125,8 +125,11 @@ class MainPanel(QtWidgets.QSplitter):
         (N_('Qty. Art'), 'artcount'),
         (N_('Matched'), 'matchedtracks'),
         (N_('Tracks'), 'albumtracks'),
+        (N_('Completed'), '~completed'),
         (N_('Length'), '~length'),
         (N_('Artist'), 'artist'),
+        (N_('Cat #'), 'catalognumber'),
+        (N_('Media'), 'media'),
     ]
 
     def __init__(self, window, parent=None):

@@ -359,7 +359,9 @@ class AlbumSearchDialog(SearchDialog):
         self.show_table(sort_column='score')
 
     def accept_event(self, arg):
+        print(arg)
         self.load_selection(arg)
+
 
     def load_selection(self, row):
         release = self.search_results[row]
