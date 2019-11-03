@@ -59,8 +59,6 @@ $noop(Configuration Section - 0-Disable / 1-Enable)
 $noop(★ For Sort Only. No Filename Formatting - ★)
 $noop(★   Usually for When Saving from Left   - ★)
 $set(_quickNoNameFormat,0)
-$set(_quickShowTime,1)
-$set(_quickShowBandwidth,1)
 
 $noop(★ Values Included before File Ext. ★)
 
@@ -253,6 +251,31 @@ $noop(★ Get Track Length ★)
 $if($eq(%_showTime%,1),
 $noop($set(_trackLength,%length%))
 )
+
+$noop(########## Start File Naming Structure Variables ###########)
+
+
+
+$set(_quickNoNameFormat,0)
+
+
+
+$noop(sorted by artist place holder)
+
+$noop(★ Typography on file naming only ★)
+$set(_titleForFilename,%title%)
+$set(_albumForFilename,%album%)
+$set(_discsubtitleForFilename,%discsubtitle%)
+$set(_albumartistForFilename,$if2(%albumartist%,%artist%))
+$noop(_albumartis1tForFilename,%albumartist%) $noop(set)
+$set(_artistForFilename,%artist%)
+$set(_albumartistsortForFilename,$if2(%albumartistsort%,%artistsort%,%artist%))
+$noop(_albumartists1ortForFilename,%albumartistsort%)$noop(set)
+$set(_artistsortForFilename,%artistsort%)
+
+
+
+
 $noop(########## Start TAG Manipulation ##########################)
 $noop(★ Organize artist by alphabetical Directories excluding leading The ★)
 $set(albumartist,$if($eq($left(%albumartist%,4),The ),%albumartistsort%,%albumartist%))
@@ -400,20 +423,6 @@ $if($gt(%_vbrRateValue%,120),$set(_fileVBRRate,V6 ),
 )))))))))
 $noop(######### File Naming Structure Variables Complete #########)
 
-$noop(########## Start File Naming Structure Variables ###########)
-
-$noop(★ Typography on file naming only ★)
-$set(_titleForFilename,%title%)
-$set(_albumForFilename,%album%)
-$set(_discsubtitleForFilename,%discsubtitle%)
-$noop(_albumartistForFilename,%albumartist%)
-$set(_artistForFilename,%artist%)
-$noop(set _albumartistsortForFilename,%albumartistsort%)
-$set(artistsortForFilename,%artistsort%)
-
-$if(%albumartistsort%,$set(_albumartistsortForFilename,%albumartistsort%),$set(_albumartistsortForFilename,%artist%))
-$if(%albumartist%,$set(_albumartistForFilename,%albumartist%),$set(_albumartistForFilename,%artist%))
-
 $noop(★ Pathname Generation Starts Here ★)
 
 $noop(★ Root level Path ★)
@@ -551,11 +560,12 @@ $if($in(%media%,Vinyl),$noop(
 
 $noop(★ GAME OVER ★)
 
-$if($eq(%_quickNoNameFormat%,1),%_filename%,%_titleForFilename%)
+$if($eq(%_quickNoNameFormat%,0),%_titleForFilename%,%_filename%)
 
 $noop(★ Insert Coin for Extra Metrics ★)
 
-$if($eq(%_quickNoNameFormat%,1),$if($eq(%_quickShowTime%,1),[%_length%] ),$if($eq(%_showTime%,1),[%_length%] ))
-$if($eq(%_quickNoNameFormat%,1),$if($eq(%_quickShowBandwidth%,1),[%_fileCBRRate%%_fileVBRRate%%_bitRateType%)],$if($eq(%_showBandwidth%,1),[%_fileCBRRate%%_fileVBRRate%%_bitRateSpeed% %_bitRateType% %_audioChannels%]))
+[%_length%]
+
+$if($eq(%_quickNoNameFormat%,0),$if($eq(%_showBandwidth%,1),[%_fileCBRRate%%_fileVBRRate%%_bitRateSpeed% %_bitRateType% %_audioChannels%],$if($eq(%_showBandwidth%,1),[%_fileCBRRate%%_fileVBRRate% %_bitRateType%)]))
 
 $noop(★ 00 CREDITS ★)
