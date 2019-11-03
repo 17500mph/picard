@@ -34,6 +34,9 @@ $noop(★                                                                      �
 $noop(★ ** Optional Plugin Needed for Last.fm [for category trending]        ★)
 $noop(★   -> https://github.com/fdemmer/Picard-Last.fm.ng-Plugin             ★)
 $noop(★                                                                      ★)
+$noop(★ - 'For Sort Only'                                                    ★)
+$noop(★   Do not format filename, optional limited [0m00s] [128 CBR]         ★)
+$noop(★                                                                      ★)
 $noop(★ - DevMode:                                                           ★)
 $noop(★   Allows better simulation control of variables for debugging        ★)
 $noop(★                                                                      ★)
@@ -49,6 +52,26 @@ $noop(★★★★★★★★★★★★★★★★★★★★★★★★�
 $noop(★ INSERT COIN ★)
 
 $noop(Configuration Section - 0-Disable / 1-Enable)
+
+$noop(★ For Sort Only. No Filename Formatting - ★)
+$noop(★   Usually for When Saving from Left   - ★)
+$set(_quickNoNameFormat,1)
+$set(_quickShowTime,1)
+$set(_quickShowBandwidth,1)
+
+$noop(★ Values Included before File Ext. ★)
+
+$if($eq(%_quickNoNameFormat%,1),$set(_showTime,0),$set(_showTime,1))
+$if($eq(%_quickNoNameFormat%,1),$set(_showBandwidth,0),$set(_showBandwidth,1))
+
+$set(_showRecordLabel,1)
+$set(_showDate,1)
+$set(_showReleaseStatus,1)
+$set(_showCatalogueNumber,1)
+
+$noop(★ For Development Only - Variable Settings in Subsections ★)
+$noop(★ Where Available - Audio Metrics Only at this Time ★)
+$set(_devMode,0)
 
 $noop(★ GLOBAL ★)
 
@@ -147,27 +170,6 @@ $set(_broadcastSubDirectory,[Broadcast]/)
 $set(_videoSubDirectory,[Video]/)
 $set(_otherSubDirectory,[Others]/)
 $set(_extDirectory,%_extension%/)
-
-
-$noop(★ For Sort Only. No Filename Formatting - ★)
-$noop(★   Usually for When Saving from Left   - ★)
-$set(_quickNoNameFormat,1)
-$set(_quickShowTime,1)
-$set(_quickShowBandwidth,1)
-
-$noop(★ Other Values Included in Filename ★)
-
-$if($eq(%_quickNoNameFormat%,1),$set(_showTime,0),$set(_showTime,1))
-$if($eq(%_quickNoNameFormat%,1),$set(_showBandwidth,0),$set(_showBandwidth,1))
-$set(_showRecordLabel,1)
-$set(_showDate,1)
-$set(_showReleaseStatus,1)
-$set(_showCatalogueNumber,1)
-
-$noop(★ For Development Only - Variable Settings in Subsections ★)
-$noop(★ Where Available - Audio Metrics Only at this Time ★)
-$set(_devMode,0)
-
 
 $noop(####################### Scratch Space ######################)
 $noop( )
