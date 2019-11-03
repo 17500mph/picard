@@ -3,6 +3,9 @@ $noop(★ MBP YA Magic-Script that does more stuff too. - v2.2  - amd/17500mph �
 $noop(★                                                                      ★)
 $noop(★ Here is a script for music renaming in MusicBrainz Picard            ★)
 $noop(★                                                                      ★)
+$noop(★ Note: Destination Director Setting                                   ★)
+$noop(★       /Volumes/3TB/Licorice Pizza                                    ★)
+$noop(★                                                                      ★)
 $noop(★ Features :                                                           ★)
 $noop(★                                                                      ★)
 $noop(★   Individualy Selectable Root Directory Organization Options:        ★)
@@ -55,7 +58,7 @@ $noop(Configuration Section - 0-Disable / 1-Enable)
 
 $noop(★ For Sort Only. No Filename Formatting - ★)
 $noop(★   Usually for When Saving from Left   - ★)
-$set(_quickNoNameFormat,1)
+$set(_quickNoNameFormat,0)
 $set(_quickShowTime,1)
 $set(_quickShowBandwidth,1)
 
@@ -65,8 +68,8 @@ $if($eq(%_quickNoNameFormat%,1),$set(_showTime,0),$set(_showTime,1))
 $if($eq(%_quickNoNameFormat%,1),$set(_showBandwidth,0),$set(_showBandwidth,1))
 
 $set(_showRecordLabel,1)
-$set(_showDate,1)
-$set(_showReleaseStatus,1)
+$set(_showDate,0)
+$set(_showReleaseStatus,0)
 $set(_showCatalogueNumber,1)
 
 $noop(★ For Development Only - Variable Settings in Subsections ★)
@@ -99,7 +102,7 @@ $set(_extraTrackHandling,1)
 $noop(★ 1  Earlier in the Sort Artist Diversion?★)
 $set(_earlierLevelArtistSeparation,0)
 $noop(★ 0  Earlier in the Sort Incomplete Diversion?★)
-$set(_earlierPresortForIncompletes,1)
+$set(_earlierPresortForIncompletes,0)
 
 $noop(★ Do you want separation by type / extension at the Root Level? ★)
 $noop(★ ~/Music/MP3/AlbumTitle/ - ~/Music/FLAC/AlbumTitle/ - ~/Music/M4A/AlbumTitle/ - ~/Music/WNA/AlbumTitle/ ★)
@@ -344,7 +347,7 @@ $noop(########### DevMode Values Only ############################)
 
 $set(_devMode,0) $noop(This one is here for convenience, for now this works here, too. But it will need to go later.)
 
-$set(_biitrate,276)
+$set(_biitrate,87)
 $set(_saample_rate,44100)
 $set(_biits_per_sample,16)
 $set(_chaannels,2)
@@ -387,13 +390,13 @@ $if($eq(%_cbrRateValue%,8),$set(_fileCBRRate,8),
 
 $if($eq(%_bitRateType%,VBR)$set(_fileVBRRate,%_vbrRateValue% ) ,
 $if($gt(%_vbrRateValue%,319),$set(_fileVBRRate,320+ ),
-$if($gt(%_vbrRateValue%,220),$set(_fileVBRRate,V0),
-$if($gt(%_vbrRateValue%,191),$set(_fileVBRRate,V1),
-$if($gt(%_vbrRateValue%,170),$set(_fileVBRRate,V2),
-$if($gt(%_vbrRateValue%,150),$set(_fileVBRRate,V3),
-$if($gt(%_vbrRateValue%,140),$set(_fileVBRRate,V4),
-$if($gt(%_vbrRateValue%,130),$set(_fileVBRRate,V5),
-$if($gt(%_vbrRateValue%,120),$set(_fileVBRRate,V6),
+$if($gt(%_vbrRateValue%,220),$set(_fileVBRRate,V0 ),
+$if($gt(%_vbrRateValue%,191),$set(_fileVBRRate,V1 ),
+$if($gt(%_vbrRateValue%,170),$set(_fileVBRRate,V2 ),
+$if($gt(%_vbrRateValue%,150),$set(_fileVBRRate,V3 ),
+$if($gt(%_vbrRateValue%,140),$set(_fileVBRRate,V4 ),
+$if($gt(%_vbrRateValue%,130),$set(_fileVBRRate,V5 ),
+$if($gt(%_vbrRateValue%,120),$set(_fileVBRRate,V6 ),
 )))))))))
 $noop(######### File Naming Structure Variables Complete #########)
 
@@ -548,11 +551,11 @@ $if($in(%media%,Vinyl),$noop(
 
 $noop(★ GAME OVER ★)
 
-$if($eq(%_quickNoNameFormat%,1),$upper(%_filename%),%_titleForFilename%)
+$if($eq(%_quickNoNameFormat%,1),%_filename%,%_titleForFilename%)
 
 $noop(★ Insert Coin for Extra Metrics ★)
 
-$if($eq(%_quickNoNameFormat%,1),$if($eq(%_quickShowTime%,1),[%_length%]),$if($eq(%_showTime%,1),[%_length%] ))
-$if($eq(%_quickNoNameFormat%,1),$if($eq(%_quickShowBandwidth%,1),[%_fileCBRRate%%_fileVBRRate% %_bitRateType%)],$if($eq(%_showBandwidth%,1),[%_fileCBRRate%%_fileVBRRate% %_bitRateSpeed%%_bitRateType% %_audioChannels%]))
+$if($eq(%_quickNoNameFormat%,1),$if($eq(%_quickShowTime%,1),[%_length%] ),$if($eq(%_showTime%,1),[%_length%] ))
+$if($eq(%_quickNoNameFormat%,1),$if($eq(%_quickShowBandwidth%,1),[%_fileCBRRate%%_fileVBRRate%%_bitRateType%)],$if($eq(%_showBandwidth%,1),[%_fileCBRRate%%_fileVBRRate%%_bitRateSpeed% %_bitRateType% %_audioChannels%]))
 
 $noop(★ 00 CREDITS ★)
