@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+from collections import defaultdict
 from functools import partial
 from heapq import (
     heappop,
@@ -53,6 +54,7 @@ from picard.track import (
 from picard.util import (
     encode_filename,
     icontheme,
+    natsort,
     restore_method,
 )
 
@@ -122,6 +124,7 @@ class MainPanel(QtWidgets.QSplitter):
 
     columns = [
         (N_('Title'), 'title'),
+        (N_('Title'), 'title'),
         (N_('Qty. Art'), 'artcount'),
         (N_('Matched'), 'matchedtracks'),
         (N_('Tracks'), 'albumtracks'),
@@ -147,18 +150,18 @@ class MainPanel(QtWidgets.QSplitter):
         TreeItem.text_color = self.palette().text().color()
         TreeItem.text_color_secondary = self.palette() \
             .brush(QtGui.QPalette.Disabled, QtGui.QPalette.Text).color()
-        TrackItem.track_colors = {
+        TrackItem.track_colors = defaultdict(lambda: TreeItem.text_color, {
             File.NORMAL: interface_colors.get_qcolor('entity_saved'),
             File.CHANGED: TreeItem.text_color,
             File.PENDING: interface_colors.get_qcolor('entity_pending'),
             File.ERROR: interface_colors.get_qcolor('entity_error'),
-        }
-        FileItem.file_colors = {
+        })
+        FileItem.file_colors = defaultdict(lambda: TreeItem.text_color, {
             File.NORMAL: TreeItem.text_color,
             File.CHANGED: TreeItem.text_color,
             File.PENDING: interface_colors.get_qcolor('entity_pending'),
             File.ERROR: interface_colors.get_qcolor('entity_error'),
-        }
+        })
 
     def save_state(self):
         config.persist["splitter_state"] = self.saveState()
@@ -416,7 +419,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
             menu.addSeparator()
 
         # Using type here is intentional. isinstance will return true for the
-        # NatAlbum instance, which can't be part of a collection.
+        # NatAlbum instance, which can't be part of a collection.
         # pylint: disable=C0123
         selected_albums = [a for a in self.window.selected_objects if type(a) == Album]
         if selected_albums:
@@ -681,9 +684,12 @@ class TreeItem(QtWidgets.QTreeWidgetItem):
         if not self.sortable:
             return False
         column = self.treeWidget().sortColumn()
+        return self.sortkey(column) < other.sortkey(column)
+
+    def sortkey(self, column):
         if column == 1:
-            return (self.obj.metadata.length or 0) < (other.obj.metadata.length or 0)
-        return self.text(column).lower() < other.text(column).lower()
+            return self.obj.metadata.length or 0
+        return natsort.natkey(self.text(column).lower())
 
 
 class ClusterItem(TreeItem):

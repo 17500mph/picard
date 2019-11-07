@@ -594,23 +594,23 @@ class Album(DataObject, Item):
                     count += 1
         return count
 
-    def column(self, column, linked_tracks=None):
+    def column(self, column):
         if column == 'title':
             if self.status is not None:
                 title = self.status
             else:
                 title = self.metadata['album']
             if self.tracks:
-                linked_tracks = 0
-                for track in self.tracks:
-                    if track.is_linked():
-                        linked_tracks += 1
+                text = title
 
-                #text = title
 #                text = '%s\u200E (%d/%d' % (title, linked_tracks, len(self.tracks))
-                text = '%s\u200E' % (title)
 
-                #text = '%s\u200E (%d/%d' % (title, linked_tracks, len(self.tracks))
+#                unmatched = self.get_num_unmatched_files()
+#                if unmatched:
+#                    text += '; %d?' % (unmatched,)
+#                unsaved = self.get_num_unsaved_files()
+#                if unsaved:
+#                    text += '; %d*' % (unsaved,)
 
                 # CoverArt.set_metadata uses the orig_metadata.images if metadata.images is empty
                 # in order to show existing cover art if there's no cover art for a release. So
@@ -622,105 +622,53 @@ class Album(DataObject, Item):
 
                 number_of_images = len(metadata.images)
                 if getattr(metadata, 'has_common_images', True):
-                   text += " "
-                else:
-                    text += ngettext("(%i image not in all tracks)", "(%i different images among tracks)",
+#                    text += ngettext("; %i image", "; %i images",
+#                                     number_of_images) % number_of_images
+
+                     text += ngettext(" (%i image)", " (%i images)",
                                      number_of_images) % number_of_images
+                else:
+
+#                    text += ngettext(" (%i image not in all tracks)", " (%i different images among tracks)",
+#                                     number_of_images) % number_of_images
+
+                    text += ngettext("; %i image not in all tracks", "; %i different images among tracks",
+                                     number_of_images) % number_of_images
+#                return text + ')'
                 return text
             else:
                 return title
 
-        elif column == 'catalognumber':
-            return self.metadata['catalognumber']
 
-        elif column == 'media':
-            return self.metadata['media']
 
         elif column == '~length':
             length = self.metadata.length
             if length:
                 return format_time(length)
+
             else:
                 return ''
 
-        elif column == 'albumtracks':
-            # text = '(%d/%d' % (linked_tracks, len(self.tracks))
-            # text = '%s\u200E (%d/%d' % (title, linked_tracks, len(self.tracks))
-            if self.tracks:
-                linked_tracks = 0
-                for track in self.tracks:
-                    if track.is_linked():
-                        linked_tracks += 1
-                text = '%d' % (len(self.tracks))
-                # text = '%d' % (linked_tracks)
-                return text
+        elif column == 'totaltracks':
+             return self.metadata['totaltracks']
 
-        elif column == '~completed':
-            trackcount = len(self.tracks)
-            if not trackcount:
-                return ''
-            return '{:03.0f}%'.format(self.get_num_matched_tracks() / trackcount * 100)
+        elif column == 'album':
+           return self.metadata['album']
 
-
-
-        elif column == 'artcount':
-            # CoverArt.set_metadata uses the orig_metadata.images if metadata.images is empty
-            # in order to show existing cover art if there's no cover art for a release. So
-            # we do the same here in order to show the number of images consistently.
-            if self.metadata.images:
-                metadata = self.metadata
-            else:
-                metadata = self.orig_metadata
-
-            number_of_images = len(metadata.images)
-            if getattr(metadata, 'has_common_images', True):
-                # text += ngettext("; %i image", "; %i images",
-                # number_of_images) % number_of_images
-
-                text = ngettext("%i img", "%i imgs",
-                                 number_of_images) % number_of_images
-                return text
-            else:
-                text = "..."
-
-                return text
+#        elif column == 'album':
+#            return self.metadata['album']
 
         elif column == 'artist':
             return self.metadata['albumartist']
 
         elif column == 'matchedtracks':
-            # text = '(%d/%d' % (linked_tracks, len(self.tracks))
-            # text = '%s\u200E (%d/%d' % (title, linked_tracks, len(self.tracks))
-            if self.tracks:
-                linked_tracks = 0
-                for track in self.tracks:
-                    if track.is_linked():
-                        linked_tracks += 1
-                text = '%d' % (linked_tracks)
-                # text = '%d/%d' % (linked_tracks, len(self.tracks))
-                unmatched = self.get_num_unmatched_files()
-                if unmatched:
-                    text += ' (%d?)' % (unmatched,)
-                unsaved = self.get_num_unsaved_files()
-                if unsaved:
-                    text += ' (%d*)' % (unsaved,)
-                return text
-
-#        elif column == 'album':
-#            return self.metadata['album']
-
-#        elif column == 'format':
-#            return self.metadata['format']
-
-#        elif column == 'extension':
- #           return self.metadata['extension']
+                title = self.metadata['album']
 
         else:
             return ''
 
-
-
-# amd: Visible Columns 0 vs. what's in the Plugin Wedge. (Columns populated on both panes are coded, others are left to the plugin for now..
+#            text = '(%d/%d' % (linked_tracks, len(self.tracks))
+#
 #            unmatched = self.get_num_unmatched_files()
 #            if unmatched:
 #                text += '; %d?' % (unmatched,)
