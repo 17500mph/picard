@@ -1,5 +1,5 @@
 $noop(★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★)
-$noop(★ MBP YA Magic-Script that does more stuff too. - v2.4  - amd/17500mph ★)
+$noop(★ MBP YA Magic-Script that does more stuff too. - v2.4a - amd/17500mph ★)
 $noop(★                                                                      ★)
 $noop(★ Here is a script for music renaming in MusicBrainz Picard            ★)
 $noop(★                                                                      ★)
@@ -432,14 +432,14 @@ $noop(★ Soundtrack in custom directory ,after soundtracksDirectory?? ★)
 $noop(   root/*/Audio Books/Title ...)
 $noop(   root/*/Soundtracks/Title ...)
 $noop(   root/*/Podcasts/Title ...)
-$if(%_isSoundTrack%,%_soundTracksDirectory%$left($swapprefix(%album%,A,An,The),1)/,/
-$if(%_isAudiobook%,%_audiobooksDirectory%$left($swapprefix(%album%,A,An,The),1)/,/)
-$if(%_isPodcast%,%_podcastDirectory%$left($swapprefix(%album%,A,An,The),1)/,/)
+$if(%_isSoundTrack%,%_soundTracksDirectory%$left($swapprefix($if2(%albumsort%,%album%),A,An,The),1)/,/
+$if(%_isAudiobook%,%_audiobooksDirectory%$left($swapprefix($if2(%albumsort%,%album%),A,An,The),1)/,/)
+$if(%_isPodcast%,%_podcastDirectory%$left($swapprefix($if2(%albumsort%,%album%),A,An,The),1)/,/)
 
 $noop(★ Various in custom directory ★)
 $noop(root/<*>/Various)
-$if(%_isVarious%,%_variousArtistsDirectory%$left($swapprefix(%album%,A,An,The),1)/,/
-	$if(%_isGlobalCompil%,%_compilationsGSubDirectory%$left($swapprefix(%album%,A,An,The),1)/,/)
+$if(%_isVarious%,%_variousArtistsDirectory%$left($swapprefix($if2(%albumsort%,%album%),A,An,The),1)/,/
+	$if(%_isGlobalCompil%,%_compilationsGSubDirectory%$left($swapprefix($if2(%albumsort%,%album%),A,An,The),1)/,/)
 	$noop(★ Order root by category ★)
 	$if($eq(%_orderTypeForRoot%,1),
 	$if2(%albumgrouping%,Unknown)
