@@ -1,5 +1,5 @@
 $noop(★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★)
-$noop(★ MBP YA Magic-Script that does more stuff too. - v2.2  - amd/17500mph ★)
+$noop(★ MBP YA Magic-Script that does more stuff too. - v2.4  - amd/17500mph ★)
 $noop(★                                                                      ★)
 $noop(★ Here is a script for music renaming in MusicBrainz Picard            ★)
 $noop(★                                                                      ★)
@@ -34,6 +34,9 @@ $noop(★ - Put multi-CD release in same directory [names become 101/102/201..]�
 $noop(★ - Vinyl can use musicbrainz style for track [A1/A2/B1...]            ★)
 $noop(★ - File Type SubDirectory in Album Directory                          ★)
 $noop(★                                                                      ★)
+$noop(★ - For Sort Directory Overrides: titlesort, artistsort, albumsort     ★)
+$noop(★                                                                      ★)
+$noop(★                                                                      ★)
 $noop(★ ** Optional Plugin Needed for Last.fm [for category trending]        ★)
 $noop(★   -> https://github.com/fdemmer/Picard-Last.fm.ng-Plugin             ★)
 $noop(★                                                                      ★)
@@ -66,8 +69,8 @@ $if($eq(%_quickNoNameFormat%,1),$set(_showTime,0),$set(_showTime,1))
 $if($eq(%_quickNoNameFormat%,1),$set(_showBandwidth,0),$set(_showBandwidth,1))
 
 $set(_showRecordLabel,1)
-$set(_showDate,0)
-$set(_showReleaseStatus,0)
+$set(_showDate,1)
+$set(_showReleaseStatus,1)
 $set(_showCatalogueNumber,1)
 
 $noop(★ For Development Only - Variable Settings in Subsections ★)
@@ -83,7 +86,6 @@ $noop(★ ~/Music/A/Artist/AlbumTitle/ ★)
 $noop(★  2: Artist first letter ★)
 $set(_orderTypeForRoot,2)
 
-
 $noop(★ Sort orderTypeForArtist ★)
 $noop(★  1: First letter of first name ★)
 $noop(★ ~/Music/M/Music Artist/AlbumTitle/  ★)
@@ -96,11 +98,10 @@ $noop(★ 0, They are Handled as InComplete ★)
 $noop(★ 1  They are Handled as Complete w/starred but not Gold icon★)
 $set(_extraTrackHandling,1)
 
-
 $noop(★ 1  Earlier in the Sort Artist Diversion?★)
 $set(_earlierLevelArtistSeparation,0)
 $noop(★ 0  Earlier in the Sort Incomplete Diversion?★)
-$set(_earlierPresortForIncompletes,0)
+$set(_earlierPresortForIncompletes,1)
 
 $noop(★ Do you want separation by type / extension at the Root Level? ★)
 $noop(★ ~/Music/MP3/AlbumTitle/ - ~/Music/FLAC/AlbumTitle/ - ~/Music/M4A/AlbumTitle/ - ~/Music/WNA/AlbumTitle/ ★)
@@ -120,9 +121,9 @@ $set(_separateByTypeInArtistDirectory,1)
 
 $noop(★ Do you want Tribute and Cover Albums Placed with Artist being attributed? ★)
 $noop(★ ~/Music/AlbumTitle/AlbumTitle MP3/Cover/ - ~/Music/AlbumTitle/AlbumTitle FLAC/Tribute/ ★)
-$noop(★ Requires Custom Use of AlbumArtistSort and ArtistSort Tags ★)
-$noop(Enter “Tribute” or “Cover” in the Album Sort as field.)
-$noop(Enter the Artist in the Album Artist Sort as field.)
+$noop(★ Requires coverTributeSort tag and albumartistsort Tags ★)
+$noop(Set a coverTributeSort tag value of “Tribute” or “Cover”.)
+$noop(Enter the associated Artist in the AlbumArtistSort as tag.)
 $set(_altArtistSort,1/)
 
 $set(_separateAlbum,0) $noop(Albums in SubDirectory as well)
@@ -158,7 +159,6 @@ $set(_useMusicBrainzStyleForVinylTrack,1)
 
 $noop(★ Custom Subdirectory Titles at Artist Level ★)
 $noop(★ ~/Music/A/Artist, Music/EP/AlbumTitle ~/Music/A/Artist, Music/Live/AlbumTitle ★)
-
 
 $set(_albumSubDirectory,Albums/)
 $set(_compilationsASubDirectory,Compilation/)
@@ -205,18 +205,19 @@ $if($in(%releasetype%,compilation),
   $set(_isArtistCompil,1)
 )
 $noop(★ Detect Audiobook ★)
-$if($in(%releasetype%,audiobook),  $set(_isAudiobook,1)
+$if($in(%releasetype%,audiobook),
+  $set(_isAudiobook,1)
 )
 $noop(★ Detect Other ★)
 $if($in(%releasetype%,other),
   $set(_isOther,1)
 )
 $noop(★ Detect Tribute ★)
-$if($in(%albumsort%,Tribute),
+$if($in(%coverTributeSort%,Tribute),
   $set(_isTribute,1)
 )
 $noop(★ Detect Cover ★)
-$if($in(%albumsort%,Cover),
+$if($in(%coverTributeSort%,Cover),
   $set(_isCover,1)
 )
 $noop(★ Detect Podcast ★)
@@ -246,35 +247,26 @@ $if($eq(%compilation%,1),
 $noop(★ Detect Global Compilation ★)
 $if($eq(%_isGlobalCompil%,1), $set(_isArtistCompil,0)
 )
-
 $noop(★ Get Track Length ★)
 $if($eq(%_showTime%,1),
 $noop($set(_trackLength,%length%))
 )
-
 $noop(########## Start File Naming Structure Variables ###########)
-
-
-
-$set(_quickNoNameFormat,0)
-
-
-
 $noop(sorted by artist place holder)
 
 $noop(★ Typography on file naming only ★)
 $set(_titleForFilename,%title%)
-$set(_albumForFilename,%album%)
+$set(_albumForFilename,$if2(%albumsort%,%album%))
+$set(_titleForFilename,$if2(%titlesort%,%title%))
+
+
 $set(_discsubtitleForFilename,%discsubtitle%)
 $set(_albumartistForFilename,$if2(%albumartist%,%artist%))
-$noop(_albumartis1tForFilename,%albumartist%) $noop(set)
+$noop(_albumartistForFilename,%albumartist%) $noop(set)
 $set(_artistForFilename,%artist%)
 $set(_albumartistsortForFilename,$if2(%albumartistsort%,%artistsort%,%artist%))
 $noop(_albumartists1ortForFilename,%albumartistsort%)$noop(set)
 $set(_artistsortForFilename,%artistsort%)
-
-
-
 
 $noop(########## Start TAG Manipulation ##########################)
 $noop(★ Organize artist by alphabetical Directories excluding leading The ★)
@@ -428,7 +420,6 @@ $noop(★ Pathname Generation Starts Here ★)
 $noop(★ Root level Path ★)
 $noop(   root = '/Volumes/Drive/Music/ ... [Destination Directory Setting])
 
-
 $noop(★ Separate by Format at root directory ★)
 $noop(   rootLevelPath/MP3/Artist/Album ...)
 $if($eq(%_rootLevelTypeSeparation%,1),$upper(%_extension%),)
@@ -463,7 +454,6 @@ $if($eq(%_orderTypeForRoot%,2),
 	$if($eq(%_orderTypeForArtist%,2),	$if(%_isGlobalCompil%,,$upper($firstalphachar($if2(%_albumartistsortForFilename%, %_artistsortForFilename%),#2)))
 	)))/
 
-
 $noop(★ Artist with first letter of first name ★)
 $noop(root/<*>/B/The B-52's)
 $if($eq(%_orderTypeForArtist%,1),$if2(%_artistSort%,%_albumartistForFilename%,%_artistForFilename%))/
@@ -472,16 +462,15 @@ $noop(★ Artist with first letter of last name ★)
 $noop(root/<*>/B/B-52's, The)
 $if($eq(%_orderTypeForArtist%,2),$if(%_isGlobalCompil%,,$if2(%_albumartistsortForFilename%,%_artistsortForFilename%)))/
 
-
-$noop(★ Using Alternate Artists Directory For Covers & Tributes  **Uses Order for Album Artist tag [Field]★)
+$noop(★ If Using Alternate Artists Directory For Covers & Tributes  **Uses Order for Album Artist tag ★)
 
 	$noop(root/<*>/O/Oingo Boingo/[Tributes]/DeadBandsParty)
-	$if($eq_all(%albumsort%,%_altArtistSort%,%_isTribute%,1),
+	$if($eq_all(%coverTributeSort%,%_altArtistSort%,%_isTribute%,1),
 	$if2(%_artistSort%,%_albumartistForFilename%,%_artistForFilename%)
 	)/
 
 	$noop(root/<*>/D/DEVO/[Covers]/Devolution)
-	$if($eq_all(%alsbumsort%,%_altArtistSort%,%_isCover%,1),
+	$if($eq_all(%coverTributeSort%,%_altArtistSort%,%_isCover%,1),
 	$if2(%_artistSort%,%_albumartistForFilename%,%_artistForFilename%)
 	)/
 	$noop(★ Organize by type ★)
@@ -566,6 +555,6 @@ $noop(★ Insert Coin for Extra Metrics ★)
 
 [%_length%]
 
-$if($eq(%_quickNoNameFormat%,0),$if($eq(%_showBandwidth%,1),[%_fileCBRRate%%_fileVBRRate%%_bitRateSpeed% %_bitRateType% %_audioChannels%],$if($eq(%_showBandwidth%,1),[%_fileCBRRate%%_fileVBRRate% %_bitRateType%)]))
+$if($eq(%_quickNoNameFormat%,0),$if($eq(%_showBandwidth%,1),[%_fileCBRRate%%_fileVBRRate%%_bitRateSpeed% %_bitRateType% %_audioChannels%],$if($eq(%_showBandwidth%,1),[%_fileCBRRate%%_fileVBRRate% %_bitRateType%])))
 
 $noop(★ 00 CREDITS ★)
