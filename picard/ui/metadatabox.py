@@ -48,14 +48,23 @@ from picard.ui.edittagdialog import EditTagDialog
 
 
 COMMON_TAGS = [
+    "~filename",
     "title",
+    "titlesort",
     "artist",
+    "artistsort",
+    "albumartist",
+    "albumartistsort",
     "album",
+    "albumsort",
     "tracknumber",
+    "totaltracks",
+    "releasetype",
+    "compilation",
+    "originalyear",
     "~length",
     "date",
 ]
-
 
 class TagStatus:
 
@@ -93,7 +102,7 @@ class TagCounter(dict):
         missing = self.parent.objects - count
 
         if tag in self.different:
-            return (ngettext("(different across %d item)", "(different across %d items)", count) % count, True)
+            return (ngettext("(%d item difference)", "(%d item differences)", count) % count, True)
         else:
             if tag == "~length":
                 msg = format_time(self.get(tag, 0))
