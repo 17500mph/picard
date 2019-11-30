@@ -1,5 +1,5 @@
 $noop(★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★)
-$noop(★ MBP YA Magic-Script that does more stuff too. - v2.4a - amd/17500mph ★)
+$noop(★ MBP YA Magic-Script that does more stuff too. - v2.5  - amd/17500mph ★)
 $noop(★                                                                      ★)
 $noop(★ Here is a script for music renaming in MusicBrainz Picard            ★)
 $noop(★                                                                      ★)
@@ -15,6 +15,7 @@ $noop(★ • subDirectory for each main type [Album/Single/EP...]              
 $noop(★ • Separate Root directory for compilations [!various]                ★)
 $noop(★ • Single Artist Compilations go in Artist Directory                  ★)
 $noop(★ • Root directory Audio Books, Podcasts, Others                       ★)
+$noop(★ • Root directory Genre PreSort                                       ★)
 $noop(★                                                                      ★)
 $noop(★  ~/MusicRoot/[O]/Oingo Boingo/[Artist Compilations]/                 ★)
 $noop(★  ~/MusicRoot/Compilations/K-Tel Hits of the 1980s Vol. 1             ★)
@@ -171,6 +172,27 @@ $set(_broadcastSubDirectory,[Broadcast]/)
 $set(_videoSubDirectory,[Video]/)
 $set(_otherSubDirectory,[Others]/)
 $set(_extDirectory,%_extension%/)
+$set(_subSortGame,[Arcade]/)
+$set(_subSortDemento,[Dementia]/)
+$set(_subSortSoundtrack,[Soundtrack]/)
+$set(_subSort12Inch,[12 Inch Mix]/)
+$set(_subSortDisney,[Disney]/)
+$set(_subSortReserved,[Reserved]/)
+$set(_subSortPreTag,[No MBID]/)
+
+
+$noop(★ Detect Audiobook ★)
+$if($in(%releasetype%,audiobook),
+  $set(_isAudiobook,1)
+)
+
+$noop(★ Detect Genre/SubSort Destinations ★)
+$if($in(%genre%,novelty),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortDemento%))
+$if($in(%genre%,game),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortArcade%))
+$if($in(%genre%,soundtrack),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortSoundtrack%))
+$if($in(%genre%,disney),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortDisney%))
+$if($in(%genre%,*-*),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortReserved%))
+$if($in(%genre%,***),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortPreTag%))
 
 $noop(####################### Scratch Space ######################)
 $noop( )
@@ -423,6 +445,9 @@ $noop(   root = '/Volumes/Drive/Music/ ... [Destination Directory Setting])
 $noop(★ Separate by Format at root directory ★)
 $noop(   rootLevelPath/MP3/Artist/Album ...)
 $if($eq(%_rootLevelTypeSeparation%,1),$upper(%_extension%),)
+
+$noop(★ Separate by _setSubSort against Genre tag values ★)
+$if($eq(%_isSubSort%,1),%_subSortDirectory%)
 
 $noop(   Earlier Incomplete Separation for Sorting ...)
 $if($eq(%_earlierPresortForIncompletes%,1),$if($eq($is_complete(),0),$if($lt($matchedtracks(),%_totalalbumtracks%),# - %_incompleteDirectory%)),$if(%_isIncomplete%,# - %_incompleteDirectory%,))/
