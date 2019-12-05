@@ -33,6 +33,9 @@ _appconfiglocation = QStandardPaths.writableLocation(QStandardPaths.AppConfigLoc
 USER_DIR = os.path.join(_appconfiglocation, "MusicBrainz", PICARD_APP_NAME)
 USER_PLUGIN_DIR = os.path.join(USER_DIR, "plugins")
 
+# Cache directory
+CACHE_DIR = QStandardPaths.writableLocation(QStandardPaths.CacheLocation)
+
 # AcoustID client API key
 ACOUSTID_KEY = 'v8pQ6oyB'
 ACOUSTID_HOST = 'api.acoustid.org'
@@ -75,6 +78,7 @@ from picard.const.attributes import MB_ATTRIBUTES
 RELEASE_FORMATS = {}
 RELEASE_PRIMARY_GROUPS = {}
 RELEASE_SECONDARY_GROUPS = {}
+RELEASE_STATUS = {}
 for k, v in MB_ATTRIBUTES.items():
     if k.startswith('DB:medium_format/name:'):
         RELEASE_FORMATS[v] = v
@@ -82,6 +86,8 @@ for k, v in MB_ATTRIBUTES.items():
         RELEASE_PRIMARY_GROUPS[v] = v
     elif k.startswith('DB:release_group_secondary_type/name:'):
         RELEASE_SECONDARY_GROUPS[v] = v
+    elif k.startswith('DB:release_status/name:'):
+        RELEASE_STATUS[v] = v
 
 # Release countries
 from picard.const.countries import RELEASE_COUNTRIES  # noqa: F401 # pylint: disable=unused-import

@@ -11,6 +11,8 @@ from test.picardtestcase import PicardTestCase
 from picard import config
 import picard.formats
 from picard.formats import ext_to_format
+from picard.formats.mutagenext.aac import AACAPEv2
+from picard.formats.mutagenext.ac3 import AC3APEv2
 from picard.formats.mutagenext.tak import TAK
 from picard.metadata import Metadata
 
@@ -30,6 +32,8 @@ settings = {
     'write_id3v1': True,
     'write_id3v23': False,
     'itunes_compatible_grouping': False,
+    'aac_save_ape': True,
+    'ac3_save_ape': True,
 }
 
 
@@ -55,9 +59,10 @@ def save_and_load_metadata(filename, metadata):
 
 
 def load_raw(filename):
-    f = mutagen.File(filename)
+    # First try special implementations in Picard
+    f = mutagen.File(filename, [AACAPEv2, AC3APEv2, TAK])
     if f is None:
-        f = mutagen.File(filename, [TAK])
+        f = mutagen.File(filename)
     return f
 
 
@@ -354,6 +359,18 @@ class CommonTests:
                 self.assertNotIn('performer:piano', new_metadata)
 
         @skipUnlessTestfile
+        def test_save_performer(self):
+            if not self.format.supports_tag('performer:'):
+                return
+            instrument = "accordéon clavier « boutons »"
+            artist = "桑山哲也"
+            tag = "performer:" + instrument
+            metadata = Metadata({ tag: artist })
+            loaded_metadata = save_and_load_metadata(self.filename, metadata)
+            self.assertIn(tag, loaded_metadata)
+            self.assertEqual(artist, loaded_metadata[tag])
+
+        @skipUnlessTestfile
         def test_ratings(self):
             if not self.supports_ratings:
                 raise unittest.SkipTest("Ratings not supported")
@@ -409,7 +426,16 @@ class CommonTests:
             self.assertNotIn('artist', loaded_metadata)
             self.assertEqual(new_metadata['title'], loaded_metadata['title'])
 
-        def test_lyrcis_with_description(self):
-            metadata = Metadata({'lyrics:foo': 'bar'})
+        @skipUnlessTestfile
+        def test_lyrics_with_description(self):
+            metadata = Metadata({'lyrics:foó': 'bar'})
             loaded_metadata = save_and_load_metadata(self.filename, metadata)
-            self.assertEqual(metadata['lyrics:foo'], loaded_metadata['lyrics'])
+            self.assertEqual(metadata['lyrics:foó'], loaded_metadata['lyrics'])
+
+        @skipUnlessTestfile
+        def test_comments_with_description(self):
+            if not self.format.supports_tag('comment:foó'):
+                return
+            metadata = Metadata({'comment:foó': 'bar'})
+            loaded_metadata = save_and_load_metadata(self.filename, metadata)
+            self.assertEqual(metadata['comment:foó'], loaded_metadata['comment:foó'])

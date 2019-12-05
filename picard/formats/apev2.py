@@ -43,7 +43,10 @@ from picard.util import (
     sanitize_date,
 )
 
-from .mutagenext import tak
+from .mutagenext import (
+    aac,
+    tak,
+)
 
 
 INVALID_CHARS = re.compile('[^\x20-\x7e]')
@@ -80,48 +83,55 @@ class APEv2File(File):
     _File = None
 
     __translate = {
-        "Album Artist": "albumartist",
-        "MixArtist": "remixer",
-        "Weblink": "website",
-        "DiscSubtitle": "discsubtitle",
-        "BPM": "bpm",
-        "ISRC": "isrc",
-        "CatalogNumber": "catalognumber",
-        "Barcode": "barcode",
-        "EncodedBy": "encodedby",
-        "Language": "language",
-        "MOVEMENT": "movementnumber",
-        "MOVEMENTNAME": "movement",
-        "MOVEMENTTOTAL": "movementtotal",
-        "SHOWMOVEMENT": "showmovement",
-        "MUSICBRAINZ_ALBUMSTATUS": "releasestatus",
-        "MUSICBRAINZ_ALBUMTYPE": "releasetype",
-        "musicbrainz_trackid": "musicbrainz_recordingid",
-        "musicbrainz_releasetrackid": "musicbrainz_trackid",
-        "Original Artist": "originalartist",
-        "REPLAYGAIN_ALBUM_GAIN": "replaygain_album_gain",
-        "REPLAYGAIN_ALBUM_PEAK": "replaygain_album_peak",
-        "REPLAYGAIN_ALBUM_RANGE": "replaygain_album_range",
-        "REPLAYGAIN_TRACK_GAIN": "replaygain_track_gain",
-        "REPLAYGAIN_TRACK_PEAK": "replaygain_track_peak",
-        "REPLAYGAIN_TRACK_RANGE": "replaygain_track_range",
-        "REPLAYGAIN_REFERENCE_LOUDNESS": "replaygain_reference_loudness",
+        "albumartist": "Album Artist",
+        "remixer": "MixArtist",
+        "website": "Weblink",
+        "discsubtitle": "DiscSubtitle",
+        "bpm": "BPM",
+        "isrc": "ISRC",
+        "catalognumber": "CatalogNumber",
+        "barcode": "Barcode",
+        "encodedby": "EncodedBy",
+        "language": "Language",
+        "movementnumber": "MOVEMENT",
+        "movement": "MOVEMENTNAME",
+        "movementtotal": "MOVEMENTTOTAL",
+        "showmovement": "SHOWMOVEMENT",
+        "releasestatus": "MUSICBRAINZ_ALBUMSTATUS",
+        "releasetype": "MUSICBRAINZ_ALBUMTYPE",
+        "musicbrainz_recordingid": "musicbrainz_trackid",
+        "musicbrainz_trackid": "musicbrainz_releasetrackid",
+        "originalartist": "Original Artist",
+        "replaygain_album_gain": "REPLAYGAIN_ALBUM_GAIN",
+        "replaygain_album_peak": "REPLAYGAIN_ALBUM_PEAK",
+        "replaygain_album_range": "REPLAYGAIN_ALBUM_RANGE",
+        "replaygain_track_gain": "REPLAYGAIN_TRACK_GAIN",
+        "replaygain_track_peak": "REPLAYGAIN_TRACK_PEAK",
+        "replaygain_track_range": "REPLAYGAIN_TRACK_RANGE",
+        "replaygain_reference_loudness": "REPLAYGAIN_REFERENCE_LOUDNESS",
     }
-    __rtranslate = dict([(v, k) for k, v in __translate.items()])
+    __rtranslate = dict([(v.lower(), k) for k, v in __translate.items()])
+
+    def __init__(self, filename):
+        super().__init__(filename)
+        self.__casemap = {}
 
     def _load(self, filename):
         log.debug("Loading file %r", filename)
+        self.__casemap = {}
         file = self._File(encode_filename(filename))
         metadata = Metadata()
         if file.tags:
             for origname, values in file.tags.items():
-                if origname.lower().startswith("cover art") and values.kind == mutagen.apev2.BINARY:
+                name_lower = origname.lower()
+                if (values.kind == mutagen.apev2.BINARY
+                    and name_lower.startswith("cover art")):
                     if b'\0' in values.value:
                         descr, data = values.value.split(b'\0', 1)
                         try:
                             coverartimage = TagCoverArtImage(
                                 file=filename,
-                                tag=origname,
+                                tag=name_lower,
                                 data=data,
                             )
                         except CoverArtImageError as e:
@@ -134,33 +144,32 @@ class APEv2File(File):
                 if values.kind != mutagen.apev2.TEXT:
                     continue
                 for value in values:
-                    name = origname
-                    if name == "Year":
+                    name = name_lower
+                    if name == "year":
                         name = "date"
                         value = sanitize_date(value)
-                    elif name == "Track":
+                    elif name == "track":
                         name = "tracknumber"
                         track = value.split("/")
                         if len(track) > 1:
                             metadata["totaltracks"] = track[1]
                             value = track[0]
-                    elif name == "Disc":
+                    elif name == "disc":
                         name = "discnumber"
                         disc = value.split("/")
                         if len(disc) > 1:
                             metadata["totaldiscs"] = disc[1]
                             value = disc[0]
-                    elif name == 'Performer' or name == 'Comment':
-                        name = name.lower() + ':'
+                    elif name == 'performer' or name == 'comment':
+                        name = name + ':'
                         if value.endswith(')'):
                             start = value.rfind(' (')
                             if start > 0:
                                 name += value[start + 2:-1]
                                 value = value[:start]
-                    elif name in self.__translate:
-                        name = self.__translate[name]
-                    else:
-                        name = name.lower()
+                    elif name in self.__rtranslate:
+                        name = self.__rtranslate[name]
+                    self.__casemap[name] = origname
                     metadata.add(name, value)
         self._info(metadata, file)
         return metadata
@@ -177,7 +186,8 @@ class APEv2File(File):
             tags.clear()
         elif images_to_save:
             for name, value in tags.items():
-                if name.lower().startswith('cover art') and value.kind == mutagen.apev2.BINARY:
+                if (value.kind == mutagen.apev2.BINARY
+                    and name.lower().startswith('cover art')):
                     del tags[name]
         temp = {}
         for name, value in metadata.items():
@@ -205,7 +215,8 @@ class APEv2File(File):
         for image in images_to_save:
             cover_filename = 'Cover Art (Front)'
             cover_filename += image.extension
-            tags['Cover Art (Front)'] = mutagen.apev2.APEValue(cover_filename.encode('ascii') + b'\0' + image.data, mutagen.apev2.BINARY)
+            tags['Cover Art (Front)'] = mutagen.apev2.APEValue(
+                cover_filename.encode('ascii') + b'\0' + image.data, mutagen.apev2.BINARY)
             break
             # can't save more than one item with the same name
             # (mp3tags does this, but it's against the specs)
@@ -233,7 +244,9 @@ class APEv2File(File):
                     del tags[real_name]
 
     def _get_tag_name(self, name):
-        if name.startswith('lyrics:'):
+        if name in self.__casemap:
+            return self.__casemap[name]
+        elif name.startswith('lyrics:'):
             return 'Lyrics'
         elif name == 'date':
             return 'Year'
@@ -243,15 +256,18 @@ class APEv2File(File):
             return 'Disc'
         elif name.startswith('performer:') or name.startswith('comment:'):
             return name.split(':', 1)[0].title()
-        elif name in self.__rtranslate:
-            return self.__rtranslate[name]
+        elif name in self.__translate:
+            return self.__translate[name]
         else:
             return name.title()
 
     @classmethod
     def supports_tag(cls, name):
-        return (bool(name) and is_valid_key(name)
-                and name not in UNSUPPORTED_TAGS)
+        return (bool(name) and name not in UNSUPPORTED_TAGS
+                and (is_valid_key(name)
+                    or name.startswith('comment:')
+                    or name.startswith('lyrics:')
+                    or name.startswith('performer:')))
 
 
 class MusepackFile(APEv2File):
@@ -315,3 +331,30 @@ class TAKFile(APEv2File):
     EXTENSIONS = [".tak"]
     NAME = "Tom's lossless Audio Kompressor"
     _File = tak.TAK
+
+
+class AACFile(APEv2File):
+    EXTENSIONS = [".aac"]
+    NAME = "AAC"
+    _File = aac.AACAPEv2
+
+    def _info(self, metadata, file):
+        super()._info(metadata, file)
+        if file.tags:
+            metadata['~format'] = "%s (APEv2)" % self.NAME
+
+    def _save(self, filename, metadata):
+        if config.setting['aac_save_ape']:
+            super()._save(filename, metadata)
+        elif config.setting['remove_ape_from_aac']:
+            try:
+                mutagen.apev2.delete(encode_filename(filename))
+            except BaseException:
+                log.exception('Error removing APEv2 tags from %s', filename)
+
+    @classmethod
+    def supports_tag(cls, name):
+        if config.setting['aac_save_ape']:
+            return APEv2File.supports_tag(name)
+        else:
+            return False

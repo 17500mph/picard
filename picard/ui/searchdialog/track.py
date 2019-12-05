@@ -35,8 +35,6 @@ from picard.util import sort_by_similarity
 from picard.webservice.api_helpers import escape_lucene_query
 
 from picard.ui.searchdialog import (
-    BY_DURATION,
-    BY_NUMBER,
     Retry,
     SearchDialog,
 )
@@ -143,13 +141,13 @@ class TrackSearchDialog(SearchDialog):
             track = obj[0]
             self.table.insertRow(row)
             self.set_table_item(row, 'name',    track, "title")
-            self.set_table_item(row, 'length',  track, "~length", sort=BY_DURATION)
+            self.set_table_item(row, 'length',  track, "~length", sortkey=track.length)
             self.set_table_item(row, 'artist',  track, "artist")
             self.set_table_item(row, 'release', track, "album")
             self.set_table_item(row, 'date',    track, "date")
             self.set_table_item(row, 'country', track, "country")
             self.set_table_item(row, 'type',    track, "releasetype")
-            self.set_table_item(row, 'score',   track, "score", sort=BY_NUMBER)
+            self.set_table_item(row, 'score',   track, "score")
         self.show_table(sort_column='score')
 
     def parse_tracks(self, tracks):
@@ -175,8 +173,9 @@ class TrackSearchDialog(SearchDialog):
                 track["album"] = _("Standalone Recording")
                 self.search_results.append((track, node))
 
-    def accept_event(self, arg):
-        self.load_selection(arg)
+    def accept_event(self, rows):
+        for row in rows:
+            self.load_selection(row)
 
     def load_selection(self, row):
         """Load the album corresponding to the selected track.

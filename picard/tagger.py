@@ -35,8 +35,10 @@ from PyQt5 import (
     QtGui,
     QtWidgets,
 )
+from PyQt5.QtDBus import QDBusConnection
 
 from picard import (
+    PICARD_APP_ID,
     PICARD_APP_NAME,
     PICARD_DESKTOP_NAME,
     PICARD_FANCY_VERSION_STR,
@@ -285,9 +287,13 @@ class Tagger(QtWidgets.QApplication):
         webbrowser2.open(authorization_url)
         if not parent:
             parent = self.window
-        authorization_code, ok = QtWidgets.QInputDialog.getText(parent,
-            _("MusicBrainz Account"), _("Authorization code:"))
-        if ok:
+        dialog = QtWidgets.QInputDialog(parent)
+        dialog.setWindowModality(QtCore.Qt.WindowModal)
+        dialog.setWindowTitle(_("MusicBrainz Account"))
+        dialog.setLabelText(_("Authorization code:"))
+        status = dialog.exec_()
+        if status == QtWidgets.QDialog.Accepted:
+            authorization_code = dialog.textValue()
             self.webservice.oauth_manager.exchange_authorization_code(
                 authorization_code, scopes,
                 partial(self.on_mb_authorization_finished, callback))
@@ -677,6 +683,7 @@ class Tagger(QtWidgets.QApplication):
                 self._acoustid.stop_analyze(file)
                 del self.files[file.filename]
                 file.remove(from_parent)
+        self.tagger_stats_changed.emit()
 
     def remove_album(self, album):
         """Remove the specified album."""
@@ -692,6 +699,7 @@ class Tagger(QtWidgets.QApplication):
             self.nats = None
         self.album_removed.emit(album)
         run_album_post_removal_processors(album)
+        self.tagger_stats_changed.emit()
 
     def remove_nat(self, track):
         """Remove the specified non-album track."""
@@ -903,6 +911,10 @@ def main(localedir=None, autoupdate=True):
         return version()
     if picard_args.long_version:
         return longversion()
+
+    if not (IS_WIN or IS_MACOS or IS_HAIKU):
+        dbus = QDBusConnection.sessionBus()
+        dbus.registerService(PICARD_APP_ID)
 
     tagger = Tagger(picard_args, unparsed_args, localedir, autoupdate)
 

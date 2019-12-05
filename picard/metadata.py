@@ -26,7 +26,10 @@ from collections.abc import (
 from PyQt5.QtCore import QObject
 
 from picard import config
-from picard.mbjson import artist_credit_from_node
+from picard.mbjson import (
+    artist_credit_from_node,
+    get_score,
+)
 from picard.plugin import (
     PluginFunctions,
     PluginPriority,
@@ -99,14 +102,18 @@ class Metadata(MutableMapping):
         return (1.0 - min(abs(a - b),
                 LENGTH_SCORE_THRES_MS) / float(LENGTH_SCORE_THRES_MS))
 
-    def compare(self, other):
+    def compare(self, other, ignored=None):
         parts = []
+        if ignored is None:
+            ignored = []
 
-        if self.length and other.length:
+        if self.length and other.length and '~length' not in ignored:
             score = self.length_score(self.length, other.length)
             parts.append((score, 8))
 
         for name, weight in self.__weights:
+            if name in ignored:
+                continue
             a = self[name]
             b = other[name]
             if a and b:
@@ -132,9 +139,7 @@ class Metadata(MutableMapping):
         linear combination of weights that the metadata matches a certain album.
         """
         parts = self.compare_to_release_parts(release, weights)
-        sim = linear_combination_of_weights(parts)
-        if 'score' in release:
-            sim *= release['score'] / 100
+        sim = linear_combination_of_weights(parts) * get_score(release)
         return SimMatchRelease(similarity=sim, release=release)
 
     def compare_to_release_parts(self, release, weights):
@@ -235,18 +240,21 @@ class Metadata(MutableMapping):
         if "releases" in track:
             releases = track['releases']
 
+        search_score = get_score(track)
         if not releases:
-            sim = linear_combination_of_weights(parts)
-            if 'score' in track:
-                sim *= track['score'] / 100
+            sim = linear_combination_of_weights(parts) * search_score
             return SimMatchTrack(similarity=sim, releasegroup=None, release=None, track=track)
+
+        if 'isvideo' in weights:
+            metadata_is_video = self['~video'] == '1'
+            track_is_video = track.get('video', False)
+            score = 1 if metadata_is_video == track_is_video else 0
+            parts.append((score, weights['isvideo']))
 
         result = SimMatchTrack(similarity=-1, releasegroup=None, release=None, track=None)
         for release in releases:
             release_parts = self.compare_to_release_parts(release, weights)
-            sim = linear_combination_of_weights(parts + release_parts)
-            if 'score' in track:
-                sim *= track['score'] / 100
+            sim = linear_combination_of_weights(parts + release_parts) * search_score
             if sim > result.similarity:
                 rg = release['release-group'] if "release-group" in release else None
                 result = SimMatchTrack(similarity=sim, releasegroup=rg, release=release, track=track)
@@ -306,24 +314,24 @@ class Metadata(MutableMapping):
         else:
             return default
 
-    def __contains__(self, name):
-        return self._store.__contains__(name)
-
     def __getitem__(self, name):
         return self.get(name, '')
 
     def set(self, name, values):
-        self._store[name] = values
-        self.deleted_tags.discard(name)
-
-    def __setitem__(self, name, values):
         if isinstance(values, str) or not isinstance(values, Iterable):
             values = [values]
         values = [str(value) for value in values if value or value == 0]
         if values:
-            self.set(name, values)
+            self._store[name] = values
+            self.deleted_tags.discard(name)
         elif name in self._store:
             del self[name]
+
+    def __setitem__(self, name, values):
+        self.set(name, values)
+
+    def __contains__(self, name):
+        return self._store.__contains__(name)
 
     def __delitem__(self, name):
         try:
@@ -335,7 +343,7 @@ class Metadata(MutableMapping):
 
     def add(self, name, value):
         if value or value == 0:
-            self._store.setdefault(name, []).append(value)
+            self._store.setdefault(name, []).append(str(value))
             self.deleted_tags.discard(name)
 
     def add_unique(self, name, value):

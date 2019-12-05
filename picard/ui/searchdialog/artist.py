@@ -26,7 +26,6 @@ from picard.mbjson import artist_to_metadata
 from picard.metadata import Metadata
 
 from picard.ui.searchdialog import (
-    BY_NUMBER,
     Retry,
     SearchDialog,
 )
@@ -104,11 +103,12 @@ class ArtistSearchDialog(SearchDialog):
             self.set_table_item(row, 'beginarea', artist, "beginarea")
             self.set_table_item(row, 'enddate',   artist, "enddate")
             self.set_table_item(row, 'endarea',   artist, "endarea")
-            self.set_table_item(row, 'score',     artist, "score", sort=BY_NUMBER)
+            self.set_table_item(row, 'score',     artist, "score")
         self.show_table(sort_column='score')
 
-    def accept_event(self, row):
-        self.load_in_browser(row)
+    def accept_event(self, rows):
+        for row in rows:
+            self.load_in_browser(row)
 
     def load_in_browser(self, row):
         self.tagger.search(self.search_results[row]["musicbrainz_artistid"], "artist")

@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+from collections import defaultdict
 from functools import partial
 from heapq import (
     heappop,
@@ -53,6 +54,7 @@ from picard.track import (
 from picard.util import (
     encode_filename,
     icontheme,
+    natsort,
     restore_method,
 )
 
@@ -124,6 +126,16 @@ class MainPanel(QtWidgets.QSplitter):
         (N_('Title'), 'title'),
         (N_('Length'), '~length'),
         (N_('Artist'), 'artist'),
+        (N_('Album Artist'), 'albumartist'),
+        (N_('Composer'), 'composer'),
+        (N_('Album'), 'album'),
+        (N_('Disc Subtitle'), 'discsubtitle'),
+        (N_('Track No.'), 'tracknumber'),
+        (N_('Disc No.'), 'discnumber'),
+        (N_('Catalog No.'), 'catalognumber'),
+        (N_('Barcode'), 'barcode'),
+        (N_('Media'), 'media'),
+        (N_('Genre'), 'genre'),
     ]
 
     def __init__(self, window, parent=None):
@@ -141,18 +153,18 @@ class MainPanel(QtWidgets.QSplitter):
         TreeItem.text_color = self.palette().text().color()
         TreeItem.text_color_secondary = self.palette() \
             .brush(QtGui.QPalette.Disabled, QtGui.QPalette.Text).color()
-        TrackItem.track_colors = {
+        TrackItem.track_colors = defaultdict(lambda: TreeItem.text_color, {
             File.NORMAL: interface_colors.get_qcolor('entity_saved'),
             File.CHANGED: TreeItem.text_color,
             File.PENDING: interface_colors.get_qcolor('entity_pending'),
             File.ERROR: interface_colors.get_qcolor('entity_error'),
-        }
-        FileItem.file_colors = {
+        })
+        FileItem.file_colors = defaultdict(lambda: TreeItem.text_color, {
             File.NORMAL: TreeItem.text_color,
             File.CHANGED: TreeItem.text_color,
             File.PENDING: interface_colors.get_qcolor('entity_pending'),
             File.ERROR: interface_colors.get_qcolor('entity_error'),
-        }
+        })
 
     def save_state(self):
         config.persist["splitter_state"] = self.saveState()
@@ -243,14 +255,76 @@ class MainPanel(QtWidgets.QSplitter):
             self.update_current_view()
 
 
+class ConfigurableColumnsHeader(QtWidgets.QHeaderView):
+
+    def __init__(self, parent=None):
+        super().__init__(QtCore.Qt.Horizontal, parent)
+        self._visible_columns = set([0])
+
+        # The following are settings applied to default headers
+        # of QTreeView and QTreeWidget.
+        self.setSectionsMovable(True)
+        self.setStretchLastSection(True)
+        self.setDefaultAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.setSectionsClickable(False)
+
+        # enable sorting, but don't actually use it by default
+        # XXX it would be nice to be able to go to the 'no sort' mode, but the
+        #     internal model that QTreeWidget uses doesn't support it
+        self.setSortIndicator(-1, QtCore.Qt.AscendingOrder)
+        self.setDefaultSectionSize(100)
+
+    def show_column(self, column, show):
+        if column == 0:  # The first column is fixed
+            return
+        self.parent().setColumnHidden(column, not show)
+        if show:
+            if self.sectionSize(column) == 0:
+                self.resizeSection(column, self.defaultSectionSize())
+            self._visible_columns.add(column)
+        elif column in self._visible_columns:
+            self._visible_columns.remove(column)
+
+    def update_visible_columns(self, columns):
+        for i, column in enumerate(MainPanel.columns):
+            self.show_column(i, i in columns)
+
+    @property
+    def visible_columns(self):
+        return self._visible_columns
+
+    def contextMenuEvent(self, event):
+        menu = QtWidgets.QMenu(self)
+
+        for i, column in enumerate(MainPanel.columns):
+            if i == 0:
+                continue
+            action = QtWidgets.QAction(column[0], self.parent())
+            action.setCheckable(True)
+            action.setChecked(i in self._visible_columns)
+            action.triggered.connect(partial(self.show_column, i))
+            menu.addAction(action)
+
+        menu.addSeparator()
+        restore_action = QtWidgets.QAction(_('Restore default columns'), self.parent())
+        restore_action.triggered.connect(self.restore_defaults)
+        menu.addAction(restore_action)
+
+        menu.exec_(event.globalPos())
+        event.accept()
+
+    def restore_defaults(self):
+        self.parent().restore_default_columns()
+
+
 class BaseTreeView(QtWidgets.QTreeWidget):
 
     def __init__(self, window, parent=None):
         super().__init__(parent)
+        self.setHeader(ConfigurableColumnsHeader(self))
         self.window = window
         self.panel = parent
 
-        self.numHeaderSections = len(MainPanel.columns)
         self.setHeaderLabels([_(h) for h, n in MainPanel.columns])
         self.restore_state()
 
@@ -259,10 +333,6 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         self.setDropIndicatorShown(True)
         self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
-        # enable sorting, but don't actually use it by default
-        # XXX it would be nice to be able to go to the 'no sort' mode, but the
-        #     internal model that QTreeWidget uses doesn't support it
-        self.header().setSortIndicator(-1, QtCore.Qt.AscendingOrder)
         self.setSortingEnabled(True)
 
         self.expand_all_action = QtWidgets.QAction(_("&Expand all"), self)
@@ -455,19 +525,24 @@ class BaseTreeView(QtWidgets.QTreeWidget):
 
     @restore_method
     def restore_state(self):
-        sizes = config.persist[self.view_sizes.name]
-        header = self.header()
-        sizes = sizes.split(" ")
-        try:
-            for i in range(self.numHeaderSections - 1):
-                header.resizeSection(i, int(sizes[i]))
-        except IndexError:
-            pass
+        self._restore_state(config.persist[self.header_state.name])
 
     def save_state(self):
-        cols = range(self.numHeaderSections - 1)
-        sizes = " ".join(str(self.header().sectionSize(i)) for i in cols)
-        config.persist[self.view_sizes.name] = sizes
+        config.persist[self.header_state.name] = self.header().saveState()
+
+    def restore_default_columns(self):
+        self._restore_state(None)
+
+    def _restore_state(self, header_state):
+        header = self.header()
+        if header_state:
+            header.restoreState(header_state)
+            for i in range(0, self.columnCount() - 1):
+                header.show_column(i, not self.isColumnHidden(i))
+        else:
+            header.update_visible_columns([0, 1, 2])
+            for i, size in enumerate([250, 50, 100]):
+                header.resizeSection(i, size)
 
     def supportedDropActions(self):
         return QtCore.Qt.CopyAction | QtCore.Qt.MoveAction
@@ -607,7 +682,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
 
 class FileTreeView(BaseTreeView):
 
-    view_sizes = config.TextOption("persist", "file_view_sizes", "250 40 100")
+    header_state = config.Option("persist", "file_view_header_state", QtCore.QByteArray())
 
     def __init__(self, window, parent=None):
         super().__init__(window, parent)
@@ -637,7 +712,7 @@ class FileTreeView(BaseTreeView):
 
 class AlbumTreeView(BaseTreeView):
 
-    view_sizes = config.TextOption("persist", "album_view_sizes", "250 40 100")
+    header_state = config.Option("persist", "album_view_header_state", QtCore.QByteArray())
 
     def __init__(self, window, parent=None):
         super().__init__(window, parent)
@@ -670,14 +745,19 @@ class TreeItem(QtWidgets.QTreeWidgetItem):
             obj.item = self
         self.sortable = sortable
         self.setTextAlignment(1, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.setTextAlignment(7, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.setTextAlignment(8, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
     def __lt__(self, other):
         if not self.sortable:
             return False
         column = self.treeWidget().sortColumn()
+        return self.sortkey(column) < other.sortkey(column)
+
+    def sortkey(self, column):
         if column == 1:
-            return (self.obj.metadata.length or 0) < (other.obj.metadata.length or 0)
-        return self.text(column).lower() < other.text(column).lower()
+            return self.obj.metadata.length or 0
+        return natsort.natkey(self.text(column).lower())
 
 
 class ClusterItem(TreeItem):

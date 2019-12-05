@@ -9,8 +9,8 @@ from distutils.spawn import find_executable
 import glob
 from io import StringIO
 import os
-from os import path
 import re
+import stat
 import sys
 import tempfile
 
@@ -24,7 +24,9 @@ from setuptools.dist import Distribution
 
 from picard import (
     PICARD_APP_ID,
+    PICARD_APP_NAME,
     PICARD_DESKTOP_NAME,
+    PICARD_DISPLAY_NAME,
     PICARD_VERSION,
     __version__,
 )
@@ -193,12 +195,14 @@ class picard_build(build):
         ('localedir=', None, ''),
         ('disable-autoupdate', None, 'disable update checking and hide settings for it'),
         ('disable-locales', None, ''),
+        ('build-number=', None, 'build number (integer)'),
     ]
 
     sub_commands = build.sub_commands
 
     def initialize_options(self):
         build.initialize_options(self)
+        self.build_number = 0
         self.build_locales = None
         self.localedir = None
         self.disable_autoupdate = None
@@ -206,6 +210,10 @@ class picard_build(build):
 
     def finalize_options(self):
         build.finalize_options(self)
+        try:
+            self.build_number = int(self.build_number)
+        except ValueError:
+            self.build_number = 0
         if self.build_locales is None:
             self.build_locales = os.path.join(self.build_base, 'locale')
         if self.localedir is None:
@@ -216,21 +224,32 @@ class picard_build(build):
             self.sub_commands.append(('build_locales', None))
 
     def run(self):
-        log.info('generating scripts/%s from scripts/picard.in', PACKAGE_NAME)
-        generate_file('scripts/picard.in', 'scripts/' + PACKAGE_NAME, {'localedir': self.localedir, 'autoupdate': not self.disable_autoupdate})
+        params = {'localedir': self.localedir, 'autoupdate': not self.disable_autoupdate}
+        generate_file('tagger.py.in', 'tagger.py', params)
+        make_executable('tagger.py')
+        generate_file('scripts/picard.in', 'scripts/' + PACKAGE_NAME, params)
         if sys.platform == 'win32':
-            # Temporarily setting it to this value to generate a nice name for Windows app
-            args['name'] = 'MusicBrainz Picard'
-            file_version = PICARD_VERSION[0:3] + PICARD_VERSION[4:]
-            args['file_version'] = '.'.join([str(v) for v in file_version])
+            file_version = PICARD_VERSION[0:3] + (self.build_number,)
+            file_version_str = '.'.join([str(v) for v in file_version])
+
+            installer_args = {
+                'display-name': PICARD_DISPLAY_NAME,
+                'file-version': file_version_str,
+            }
             if os.path.isfile('installer/picard-setup.nsi.in'):
-                generate_file('installer/picard-setup.nsi.in', 'installer/picard-setup.nsi', args)
+                generate_file('installer/picard-setup.nsi.in', 'installer/picard-setup.nsi', {**args, **installer_args})
             version_args = {
                 'filevers': str(file_version),
                 'prodvers': str(file_version),
             }
             generate_file('win-version-info.txt.in', 'win-version-info.txt', {**args, **version_args})
-            args['name'] = 'picard'
+
+            generate_file('appxmanifest.xml.in', 'appxmanifest.xml', {
+                'app-id': PICARD_APP_ID,
+                'display-name': PICARD_DISPLAY_NAME,
+                'short-name': PICARD_APP_NAME,
+                'version': file_version_str,
+            })
         elif sys.platform == 'linux':
             self.run_command('build_appdata')
         build.run(self)
@@ -352,7 +371,7 @@ class picard_build_appdata(Command):
     description = 'Build appdata metadata file'
     user_options = []
 
-    re_release = re.compile('^# Version (?P<version>\d+(?:\.\d+){1,2}) - (?P<date>\d{4}-\d{2}-\d{2})', re.MULTILINE)
+    re_release = re.compile(r'^# Version (?P<version>\d+(?:\.\d+){1,2}) - (?P<date>\d{4}-\d{2}-\d{2})', re.MULTILINE)
 
     def initialize_options(self):
         pass
@@ -378,6 +397,7 @@ class picard_build_appdata(Command):
             args = {
                 'app-id': PICARD_APP_ID,
                 'desktop-id': PICARD_DESKTOP_NAME,
+                'display-name': PICARD_DISPLAY_NAME,
                 'releases': '\n    '.join(releases)
             }
             generate_file(source_file, APPDATA_FILE, args)
@@ -428,14 +448,22 @@ class picard_get_po_files(Command):
     def run(self):
         if tx_executable is None:
             sys.exit('Transifex client executable (tx) not found.')
-        txpull_cmd = [
+        self.spawn([
             tx_executable,
             'pull',
             '--force',
             '--all',
             '--minimum-perc=%d' % self.minimum_perc
-        ]
-        self.spawn(txpull_cmd)
+        ])
+        self.spawn([
+            tx_executable,
+            'pull',
+            '--force',
+            '--resource',
+            'musicbrainz.picard',
+            '--language',
+            'en_AU,en_GB,en_CA'
+        ])
 
 
 _regen_pot_description = "Regenerate po/picard.pot, parsing source tree for new or updated strings"
@@ -544,6 +572,7 @@ class picard_update_constants(Command):
             'DB:medium_format/name',
             'DB:release_group_primary_type/name',
             'DB:release_group_secondary_type/name',
+            'DB:release_status/name',
         )
         with open(attributes_potfile, 'rb') as f:
             log.info('Parsing %s' % attributes_potfile)
@@ -565,8 +594,8 @@ class picard_update_constants(Command):
                   "# Use `python setup.py {option}` to update it.\n"
                   "\n"
                   "RELEASE_COUNTRIES = {{\n")
-        line   =  "    '{code}': '{name}',\n"
-        footer =  "}}\n"
+        line = "    '{code}': '{name}',\n"
+        footer = "}}\n"
         filename = os.path.join('picard', 'const', 'countries.py')
         with open(filename, 'w') as countries_py:
             def write(s, **kwargs):
@@ -585,8 +614,8 @@ class picard_update_constants(Command):
                   "# Use `python setup.py {option}` to update it.\n"
                   "\n"
                   "MB_ATTRIBUTES = {{\n")
-        line   =  "    '{key}': '{value}',\n"
-        footer =  "}}\n"
+        line = "    '{key}': '{value}',\n"
+        footer = "}}\n"
         filename = os.path.join('picard', 'const', 'attributes.py')
         with open(filename, 'w') as attributes_py:
             def write(s, **kwargs):
@@ -619,7 +648,7 @@ class picard_patch_version(Command):
         regex = re.compile(r'^PICARD_BUILD_VERSION_STR\s*=.*$', re.MULTILINE)
         with open(filename, 'r+b') as f:
             source = (f.read()).decode()
-            build = self.platform + '_' + datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
+            build = self.platform + '.' + datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
             patched_source = regex.sub('PICARD_BUILD_VERSION_STR = "%s"' % build, source).encode()
             f.seek(0)
             f.write(patched_source)
@@ -669,8 +698,8 @@ def _picard_packages():
     return tuple(sorted(packages))
 
 
-this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+this_directory = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 args = {
@@ -720,9 +749,14 @@ args = {
 
 
 def generate_file(infilename, outfilename, variables):
+    log.info('generating %s from %s', outfilename, infilename)
     with open(infilename, "rt") as f_in:
         with open(outfilename, "wt") as f_out:
             f_out.write(f_in.read() % variables)
+
+
+def make_executable(filename):
+    os.chmod(filename, os.stat(filename).st_mode | stat.S_IEXEC)
 
 
 def find_file_in_path(filename):

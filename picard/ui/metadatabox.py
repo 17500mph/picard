@@ -41,20 +41,14 @@ from picard.util import (
     thread,
     throttle,
 )
+from picard.util.preservedtags import PreservedTags
 from picard.util.tags import display_tag_name
 
 from picard.ui.colors import interface_colors
-from picard.ui.edittagdialog import EditTagDialog
-
-
-COMMON_TAGS = [
-    "title",
-    "artist",
-    "album",
-    "tracknumber",
-    "~length",
-    "date",
-]
+from picard.ui.edittagdialog import (
+    EditTagDialog,
+    TagEditorDelegate,
+)
 
 
 class TagStatus:
@@ -138,7 +132,7 @@ class TagDiff(object):
             removable = True
         elif orig_values and new_values and self.__tag_ne(tag, orig_values, new_values):
             self.status[tag] |= TagStatus.CHANGED
-        elif not (orig_values or new_values or tag in COMMON_TAGS):
+        elif not (orig_values or new_values or tag in config.setting['metadatabox_top_tags']):
             self.status[tag] |= TagStatus.EMPTY
         else:
             self.status[tag] |= TagStatus.NOCHANGE
@@ -155,30 +149,23 @@ class TagDiff(object):
         return TagStatus.NOCHANGE
 
 
-class PreservedTags:
+class TableTagEditorDelegate(TagEditorDelegate):
 
-    opt_name = 'preserved_tags'
+    def createEditor(self, parent, option, index):
+        editor = super().createEditor(parent, option, index)
+        if editor and isinstance(editor, QtWidgets.QPlainTextEdit):
+            table = self.parent()
+            # Set the editor to the row height, but at least 80 pixel
+            # to allow for proper multiline editing.
+            height = max(80, table.rowHeight(index.row()) - 1)
+            editor.setMinimumSize(QtCore.QSize(0, height))
+            # Resize the row so the editor fits in. Add 1 pixel, otherwise the
+            # frame gets hidden.
+            table.setRowHeight(index.row(), editor.frameSize().height() + 1)
+        return editor
 
-    def __init__(self):
-        self._tags = self._from_config()
-
-    def _to_config(self):
-        config.setting[self.opt_name] = ", ".join(sorted(self._tags))
-
-    def _from_config(self):
-        tags = config.setting[self.opt_name].split(',')
-        return set(filter(bool, map(str.strip, tags)))
-
-    def add(self, name):
-        self._tags.add(name)
-        self._to_config()
-
-    def discard(self, name):
-        self._tags.discard(name)
-        self._to_config()
-
-    def __contains__(self, key):
-        return key in self._tags
+    def get_tag_name(self, index):
+        return index.data(QtCore.Qt.UserRole)
 
 
 class MetadataBox(QtWidgets.QTableWidget):
@@ -205,6 +192,7 @@ class MetadataBox(QtWidgets.QTableWidget):
         self.setTabKeyNavigation(False)
         self.setStyleSheet("QTableWidget {border: none;}")
         self.setAttribute(QtCore.Qt.WA_MacShowFocusRect, 1)
+        self.setItemDelegate(TableTagEditorDelegate(self))
         self.files = set()
         self.tracks = set()
         self.objects = set()
@@ -291,13 +279,21 @@ class MetadataBox(QtWidgets.QTableWidget):
         super().closeEditor(editor, hint)
         tag = self.tag_diff.tag_names[self.editing.row()]
         old = self.tag_diff.new[tag]
-        new = [editor.text()]
+        new = [self._get_editor_value(editor)]
         if old == new:
             self.editing.setText(old[0])
         else:
             self.set_tag_values(tag, new)
         self.editing = None
         self.update()
+
+    @staticmethod
+    def _get_editor_value(editor):
+        if hasattr(editor, 'text'):
+            return editor.text()
+        elif hasattr(editor, 'toPlainText'):
+            return editor.toPlainText()
+        return ''
 
     def contextMenuEvent(self, event):
         menu = QtWidgets.QMenu(self)
@@ -501,7 +497,7 @@ class MetadataBox(QtWidgets.QTableWidget):
                 tag_diff.objects += 1
 
         all_tags = set(list(orig_tags.keys()) + list(new_tags.keys()))
-        common_tags = [tag for tag in COMMON_TAGS if tag in all_tags]
+        common_tags = [tag for tag in config.setting['metadatabox_top_tags'] if tag in all_tags]
         tag_names = common_tags + sorted(all_tags.difference(common_tags),
                                          key=lambda x: display_tag_name(x).lower())
 
@@ -578,8 +574,19 @@ class MetadataBox(QtWidgets.QTableWidget):
             orig_item.setForeground(color)
             new_item.setForeground(color)
 
+            alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
+            tag_item.setTextAlignment(alignment)
+            orig_item.setTextAlignment(alignment)
+            new_item.setTextAlignment(alignment)
+
+            # Expand the row for multiline content, but limit the maximum
+            # row height.
+            row_height = min(self.sizeHintForRow(i), 160)
+            self.setRowHeight(i, row_height)
+
     def set_item_value(self, item, tags, name):
         text, italic = tags.display_value(name)
+        item.setData(QtCore.Qt.UserRole, name)
         item.setText(text)
         font = item.font()
         font.setItalic(italic)

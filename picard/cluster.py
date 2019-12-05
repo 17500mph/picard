@@ -57,6 +57,7 @@ class Cluster(QtCore.QObject, Item):
         'album': 17,
         'albumartist': 6,
         'totaltracks': 5,
+        'releasetype': 10,
         'releasecountry': 2,
         'format': 2,
     }
@@ -73,6 +74,7 @@ class Cluster(QtCore.QObject, Item):
         self.related_album = related_album
         self.files = []
         self.lookup_task = None
+        self.update_metadata_images_enabled = True
 
     def __repr__(self):
         if self.related_album:
@@ -179,6 +181,10 @@ class Cluster(QtCore.QObject, Item):
             return format_time(self.metadata.length)
         elif column == 'artist':
             return self.metadata['albumartist']
+        elif column == 'tracknumber':
+            return self.metadata['totaltracks']
+        elif column == 'discnumber':
+            return self.metadata['totaldiscs']
         return self.metadata[column]
 
     def _lookup_finished(self, document, http, error):
@@ -296,8 +302,11 @@ class Cluster(QtCore.QObject, Item):
 
             yield album_name, artist_name, (files[i] for i in album)
 
+    def enable_update_metadata_images(self, enabled):
+        self.update_metadata_images_enabled = enabled
+
     def update_metadata_images(self):
-        if self.can_show_coverart:
+        if self.update_metadata_images_enabled and self.can_show_coverart:
             update_metadata_images(self)
 
 

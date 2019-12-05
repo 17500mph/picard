@@ -17,21 +17,32 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+from mutagen._util import loadfile
 from mutagen.aac import AAC
 from mutagen.apev2 import (
     APENoHeaderError,
     APEv2,
+    _APEv2Data,
     error as APEError,
 )
 
-from picard.formats.apev2 import APEv2File
-
 
 class AACAPEv2(AAC):
+    """AAC file with APEv2 tags.
+    """
+    @loadfile()
     def load(self, filething):
         super().load(filething)
         try:
             self.tags = APEv2(filething)
+            # Correct the calculated length
+            if not hasattr(self.info, 'bitrate') or self.info.bitrate == 0:
+                return
+            ape_data = _APEv2Data(filething.fileobj)
+            if ape_data.size is not None:
+                # Remove APEv2 data length from calculated track length
+                extra_length = (8.0 * ape_data.size) / self.info.bitrate
+                self.info.length = max(self.info.length - extra_length, 0.001)
         except APENoHeaderError:
             self.tags = None
 
@@ -40,14 +51,3 @@ class AACAPEv2(AAC):
             self.tags = APEv2()
         else:
             raise APEError("%r already has tags: %r" % (self, self.tags))
-
-
-class AACFile(APEv2File):
-    EXTENSIONS = [".aac"]
-    NAME = "AAC"
-    _File = AACAPEv2
-
-    def _info(self, metadata, file):
-        super()._info(metadata, file)
-        if file.tags:
-            metadata['~format'] = "%s (APEv2)" % self.NAME

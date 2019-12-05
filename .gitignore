@@ -17,6 +17,7 @@ Thumbs.db:encryptable
 *.pyc
 *.pyd
 *.so
+appxmanifest.xml
 build/
 coverage.xml
 dist/
@@ -27,6 +28,7 @@ picard.egg-info
 po/attributes/attributes.pot
 po/countries/countries.pot
 scripts/picard
+/tagger.py
 win-version-info.txt
 
 # Other files

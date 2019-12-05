@@ -57,6 +57,7 @@ from picard.util import (
     tracknum_from_filename,
 )
 from picard.util.filenaming import make_short_filename
+from picard.util.preservedtags import PreservedTags
 from picard.util.scripttofilename import script_to_filename
 from picard.util.tags import PRESERVED_TAGS
 
@@ -85,9 +86,10 @@ class File(QtCore.QObject, Item):
         "album": 5,
         "length": 10,
         "totaltracks": 4,
-        "releasetype": 20,
+        "releasetype": 14,
         "releasecountry": 2,
         "format": 2,
+        "isvideo": 2,
     }
 
     class PreserveTimesStatError(Exception):
@@ -185,12 +187,11 @@ class File(QtCore.QObject, Item):
 
     def copy_metadata(self, metadata, preserve_deleted=True):
         acoustid = self.metadata["acoustid_id"]
-        preserve = config.setting["preserved_tags"].strip()
         saved_metadata = {}
 
-        for tag in re.split(r"\s*,\s*", preserve) + PRESERVED_TAGS:
-            values = self.orig_metadata.getall(tag)
-            if values:
+        preserved_tags = PreservedTags()
+        for tag, values in self.orig_metadata.rawitems():
+            if tag in preserved_tags or tag in PRESERVED_TAGS:
                 saved_metadata[tag] = values
         deleted_tags = self.metadata.deleted_tags
         self.metadata.copy(metadata)
@@ -198,7 +199,7 @@ class File(QtCore.QObject, Item):
             for tag in deleted_tags:
                 del self.metadata[tag]
         for tag, values in saved_metadata.items():
-            self.metadata.set(tag, values)
+            self.metadata[tag] = values
 
         if acoustid and "acoustid_id" not in metadata.deleted_tags:
             self.metadata["acoustid_id"] = acoustid
@@ -258,11 +259,7 @@ class File(QtCore.QObject, Item):
             if config.setting["preserve_timestamps"]:
                 try:
                     self._preserve_times(old_filename, save)
-                except self.PreserveTimesStatError as why:
-                    log.warning(why)
-                    # we didn't save the file yet, bail out
-                    return None
-                except self.FilePreserveTimesUtimeError as why:
+                except self.PreserveTimesUtimeError as why:
                     log.warning(why)
             else:
                 save()
@@ -548,15 +545,17 @@ class File(QtCore.QObject, Item):
         names = set(new_metadata.keys())
         names.update(self.orig_metadata.keys())
         clear_existing_tags = config.setting["clear_existing_tags"]
+        ignored_tags = config.setting["compare_ignore_tags"]
         for name in names:
-            if not name.startswith('~') and self.supports_tag(name):
+            if (not name.startswith('~') and self.supports_tag(name)
+                and name not in ignored_tags):
                 new_values = new_metadata.getall(name)
                 if not (new_values or clear_existing_tags
                         or name in new_metadata.deleted_tags):
                     continue
                 orig_values = self.orig_metadata.getall(name)
                 if orig_values != new_values:
-                    self.similarity = self.orig_metadata.compare(new_metadata)
+                    self.similarity = self.orig_metadata.compare(new_metadata, ignored_tags)
                     if self.state == File.NORMAL:
                         self.state = File.CHANGED
                     break
@@ -676,6 +675,7 @@ class File(QtCore.QObject, Item):
                 statusbar(N_("File '%(filename)s' identified!"))
                 (track_id, release_group_id, release_id, node) = trackmatch
                 if lookuptype == File.LOOKUP_ACOUSTID:
+                    self.metadata['acoustid_id'] = node.get('acoustid')
                     self.tagger.acoustidmanager.add(self, track_id)
                 if release_group_id is not None:
                     releasegroup = self.tagger.get_release_group_by_id(release_group_id)
@@ -701,13 +701,12 @@ class File(QtCore.QObject, Item):
             return None
         else:
             track_id = best_match.result.track['id']
-            release_group_id, release_id, node = None, None, None
+            release_group_id, release_id = None, None
 
             if best_match.result.release:
                 release_group_id = best_match.result.releasegroup['id']
                 release_id = best_match.result.release['id']
-            elif 'title' in best_match.result.track:
-                node = best_match.result.track
+            node = best_match.result.track
             return (track_id, release_group_id, release_id, node)
 
     def lookup_metadata(self):

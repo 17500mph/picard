@@ -4,6 +4,7 @@
 # Copyright (C) 2007 Lukáš Lalinský
 # Copyright (C) 2006 Matthias Friedrich
 # Copyright (C) 2013 Laurent Monin
+# Copyright (C) 2018, 2019 Philipp Wolfer
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,6 +20,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import traceback
+
+from PyQt5 import QtCore
+
+from picard import log
+
+from picard.ui.cdlookup import CDLookupDialog
+
+
 try:
     # use python-libdiscid (http://pythonhosted.org/python-libdiscid/)
     from libdiscid.compat import discid
@@ -28,14 +38,6 @@ except ImportError:
         import discid
     except (ImportError, OSError):
         discid = None
-
-import traceback
-
-from PyQt5 import QtCore
-
-from picard import log
-
-from picard.ui.cdlookup import CDLookupDialog
 
 
 class Disc(QtCore.QObject):

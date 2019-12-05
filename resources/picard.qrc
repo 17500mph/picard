@@ -22,6 +22,14 @@
     <file>images/16x16/edit-paste@2x.png</file>
     <file>images/16x16/folder.png</file>
     <file>images/16x16/folder@2x.png</file>
+    <file>images/16x16/go-down.png</file>
+    <file>images/16x16/go-down@2x.png</file>
+    <file>images/16x16/go-next.png</file>
+    <file>images/16x16/go-next@2x.png</file>
+    <file>images/16x16/go-previous.png</file>
+    <file>images/16x16/go-previous@2x.png</file>
+    <file>images/16x16/go-up.png</file>
+    <file>images/16x16/go-up@2x.png</file>
     <file>images/16x16/list-remove.png</file>
     <file>images/16x16/list-remove@2x.png</file>
     <file>images/16x16/lookup-musicbrainz.png</file>
@@ -36,6 +44,10 @@
     <file>images/16x16/media-optical-saved@2x.png</file>
     <file>images/16x16/media-optical.png</file>
     <file>images/16x16/media-optical@2x.png</file>
+    <file>images/16x16/move-all-left.png</file>
+    <file>images/16x16/move-all-left@2x.png</file>
+    <file>images/16x16/move-all-right.png</file>
+    <file>images/16x16/move-all-right@2x.png</file>
     <file>images/16x16/org.musicbrainz.Picard.png</file>
     <file>images/16x16/pause.png</file>
     <file>images/16x16/pause@2x.png</file>
@@ -122,6 +134,8 @@
     <file>images/256x256/org.musicbrainz.Picard.png</file>
     <file>images/CoverArtShadow.png</file>
     <file>images/arrow.png</file>
+    <file>images/cdrom.png</file>
+    <file>images/cdrom@2x.png</file>
     <file>images/file-pending.png</file>
     <file>images/file-pending@2x.png</file>
     <file>images/file.png</file>

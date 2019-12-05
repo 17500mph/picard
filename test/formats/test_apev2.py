@@ -12,12 +12,15 @@ from picard.formats import (
     apev2,
     open_,
 )
+from picard.formats.mutagenext.tak import native_tak
 from picard.metadata import Metadata
 
 from .common import (
     TAGS,
     CommonTests,
     load_metadata,
+    load_raw,
+    save_metadata,
     save_raw,
     skipUnlessTestfile,
 )
@@ -70,6 +73,51 @@ class CommonApeTests:
             save_raw(self.filename, metadata)
             loaded_metadata = load_metadata(self.filename)
             self.assertEqual(0, len(loaded_metadata.images))
+
+        def test_supports_extended_tags(self):
+            performer_tag = "performer:accordéon clavier « boutons »"
+            self.assertTrue(self.format.supports_tag(performer_tag))
+            self.assertTrue(self.format.supports_tag('lyrics:foó'))
+            self.assertTrue(self.format.supports_tag('comment:foó'))
+
+        def test_case_insensitive_reading(self):
+            self._read_case_insensitive_tag('artist', 'Artist')
+            self._read_case_insensitive_tag('albumartist', 'Album Artist')
+            self._read_case_insensitive_tag('performer:', 'Performer')
+            self._read_case_insensitive_tag('tracknumber', 'Track')
+            self._read_case_insensitive_tag('discnumber', 'Disc')
+
+        @skipUnlessTestfile
+        def test_ci_tags_preserve_case(self):
+            # Ensure values are not duplicated on repeated save and are saved
+            # case preserving.
+            for name in ('CUStom', 'ARtist'):
+                tags = {}
+                tags[name] = 'foo'
+                save_raw(self.filename, tags)
+                loaded_metadata = load_metadata(self.filename)
+                loaded_metadata[name.lower()] = 'bar'
+                save_metadata(self.filename, loaded_metadata)
+                raw_metadata = dict(load_raw(self.filename))
+                self.assertIn(name, raw_metadata)
+                self.assertEqual(
+                    raw_metadata[name],
+                    loaded_metadata[name.lower()])
+                self.assertEqual(1, len(raw_metadata[name]))
+                self.assertNotIn(name.upper(), raw_metadata)
+
+        def _read_case_insensitive_tag(self, name, ape_name):
+            upper_ape_name = ape_name.upper()
+            metadata = {
+                upper_ape_name: 'Some value'
+            }
+            save_raw(self.filename, metadata)
+            loaded_metadata = load_metadata(self.filename)
+            self.assertEqual(metadata[upper_ape_name], loaded_metadata[name])
+            save_metadata(self.filename, loaded_metadata)
+            raw_metadata = load_raw(self.filename)
+            self.assertIn(upper_ape_name, raw_metadata.keys())
+            self.assertEqual(metadata[upper_ape_name], raw_metadata[ape_name])
 
 
 class MonkeysAudioTest(CommonApeTests.ApeTestCase):
@@ -150,6 +198,16 @@ class TAKTest(CommonApeTests.ApeTestCase):
     testfile = 'test.tak'
     supports_ratings = False
     unexpected_info = ['~video']
+
+    def setUp(self):
+        super().setUp()
+        if native_tak:
+            self.expected_info = {
+                'length': 82,
+                '~channels': '2',
+                '~sample_rate': '44100',
+                '~bits_per_sample': '16'
+            }
 
 
 class OptimFROGLosslessTest(CommonApeTests.ApeTestCase):
