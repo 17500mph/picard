@@ -23,6 +23,24 @@ $set(_albumartistsortForFilename,$if2(%aalbumartistsort%,%aartistsort%,%aartist%
 
 
 
+COMMON_TAGS = [
+    "~filename",
+    "title",
+    "titlesort",
+    "artist",
+    "artistsort",
+    "albumartist",
+    "albumartistsort",
+    "album",
+    "albumsort",
+    "tracknumber",
+    "totaltracks",
+    "releasetype",
+    "compilation",
+    "originalyear",
+    "~length",
+    "date",
+]
 
 
 

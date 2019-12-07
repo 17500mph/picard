@@ -116,6 +116,10 @@ $noop(★ Do you want the Album Title added before the type / extension after th
 $noop(★ ~/Music/AlbumTitle/AlbumTitle MP3/ - ~/Music/AlbumTitle/AlbumTitle FLAC/ - ~/Music/AlbumTitleAlbumTitle /M4A ★)
 $set(_albumNameAtTypeSeparation,1)
 
+$noop(Root Level Sort Against Select Genre Values.)
+$noop(★ ~/Music/GenreSubSortDirectory/AlbumTitle/AlbumTitle MP3/Single/ - ~/Music/GenreSubSortDirectory/AlbumTitle/AlbumTitle FLAC/EP/ ★)
+$set(_isSubSort,1)
+
 $noop(Album Name/EP/Single/Live/Album etc.)
 $noop(★ ~/Music/AlbumTitle/AlbumTitle MP3/Single/ - ~/Music/AlbumTitle/AlbumTitle FLAC/EP/ ★)
 $set(_separateByTypeInArtistDirectory,1)
@@ -174,25 +178,30 @@ $set(_otherSubDirectory,[Others]/)
 $set(_extDirectory,%_extension%/)
 $set(_subSortGame,[Arcade]/)
 $set(_subSortDemento,[Dementia]/)
-$set(_subSortSoundtrack,[Soundtrack]/)
 $set(_subSort12Inch,[12 Inch Mix]/)
 $set(_subSortDisney,[Disney]/)
-$set(_subSortReserved,[Reserved]/)
+$set(_subSortPodcast,[Podcast]/)
+$set(_subSortReserved,[Singles Candidates]/)
 $set(_subSortPreTag,[No MBID]/)
 
 
 $noop(★ Detect Audiobook ★)
-$if($in(%releasetype%,audiobook),
-  $set(_isAudiobook,1)
-)
+$if($in(%releasetype%,audiobook),   $set(_isAudiobook,1))
 
 $noop(★ Detect Genre/SubSort Destinations ★)
-$if($in(%genre%,novelty),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortDemento%))
-$if($in(%genre%,game),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortArcade%))
-$if($in(%genre%,soundtrack),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortSoundtrack%))
-$if($in(%genre%,disney),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortDisney%))
-$if($in(%genre%,*-*),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortReserved%))
-$if($in(%genre%,***),$set(_isSubSort,1)$set(_subSortDirectory,%_subSortPreTag%))
+
+$if($in(%genre%,*-*),$set(_subSortDirectory,%_subSortReserved%))
+$if($in(%genre%,***),$set(_subSortDirectory,%_subSortPreTag%))
+$if($in(%genre%,Novelty),$set(_subSortDirectory,%_subSortDemento%))
+$if($in(%genre%,Humo),$set(_subSortDirectory,%_subSortDemento%))
+$if($in(%genre%,Demento),$set(_subSortDirectory,%_subSortDemento%))
+$if($in(%genre%,Comedy),$set(_subSortDirectory,%_subSortDemento%))
+$if($in(%genre%,FuMP),$set(_subSortDirectory,%_subSortDemento%))
+$if($in(%genre%,Game),$set(_subSortDirectory,%_subSortGame%))
+$if($in(%genre%,Disney),$set(_subSortDirectory,%_subSortDisney%))
+$if($in(%genre%,cast),$set(_subSortDirectory,%_subSortPodcast%))
+$if($in(%genre%,12 Inch),$set(_subSortDirectory,%_subSort12Inch%))
+
 
 $noop(####################### Scratch Space ######################)
 $noop( )
@@ -537,7 +546,8 @@ $if(%catalognumber%,$if($eq(%_showCatalogueNumber%,1),$title( [%catalognumber%])
 
 $noop(★ Bouncing off the Satellites [Vinyl] [1986] [Official] [MCA] [AB-DC001]/ ★)
 $noop(★ Bouncing off the Satellites [Vinyl] [1986] [Official] [MCA] [AB-DC001] - Incomplete/ ★)
-$if($eq(%_extraTrackHandling%,1),$if($eq($is_complete(),0),$if($lt($matchedtracks( ),%_totalalbumtracks%), - %_incompleteDirectory%)),$if(%_isIncomplete%, - %_incompleteDirectory%,))/
+$if($eq(%_extraTrackHandling%,1),$if($eq($is_complete(),0),$if($lt($matchedtracks( ),%_totalalbumtracks%),$if($and(%_isIncomplete%,$not($in(%SavePerfectAnyway%,Yes))), - %_incompleteDirectory%,))),$if($and(%_isIncomplete%,$not($in(%SavePerfectAnyway%,Yes))), - %_incompleteDirectory%,)
+)/
 
 $noop(★ Bouncing off the Satellites [Vinyl] [1986] [Official] [MCA] [AB-DC001]/ MP3 / ★)
 $noop(★ Bouncing off the Satellites [Vinyl] [1986] [Official] [MCA] [AB-DC001]/ Bouncing off the Satellites MP3 / ★)

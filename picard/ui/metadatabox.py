@@ -47,25 +47,6 @@ from picard.ui.colors import interface_colors
 from picard.ui.edittagdialog import EditTagDialog
 
 
-COMMON_TAGS = [
-    "~filename",
-    "title",
-    "titlesort",
-    "artist",
-    "artistsort",
-    "albumartist",
-    "albumartistsort",
-    "album",
-    "albumsort",
-    "tracknumber",
-    "totaltracks",
-    "releasetype",
-    "compilation",
-    "originalyear",
-    "~length",
-    "date",
-]
-
 class TagStatus:
 
     NOCHANGE = 1

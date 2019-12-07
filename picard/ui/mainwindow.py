@@ -62,6 +62,7 @@ from picard.ui.infodialog import (
     FileInfoDialog,
     TrackInfoDialog,
 )
+from picard.ui.scriptsmenu import ScriptsMenu
 from picard.ui.infostatus import InfoStatus
 from picard.ui.itemviews import MainPanel
 from picard.ui.logview import (
@@ -639,6 +640,14 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         menu.addAction(self.enable_tag_saving_action)
         menu.addSeparator()
         menu.addAction(self.options_action)
+
+        scripts = config.setting["list_of_scripts"]
+        menu = self.menuBar().addMenu(_("&Functions"))
+        menu.addSeparator()
+        menu.addMenu(ScriptsMenu(scripts, _("&Run scripts"), menu))
+        menu.addSeparator()
+        menu.addAction(self.options_action)
+
         menu = self.menuBar().addMenu(_("&Tools"))
         menu.addAction(self.refresh_action)
         if len(self.cd_lookup_menu.actions()) > 1:

@@ -73,7 +73,7 @@ from picard.util.textencoding import asciipunct
 
 from picard.ui.item import Item
 
-
+# # #
 def _create_artist_node_dict(source_node):
     return {x['artist']['id']: x['artist'] for x in source_node['artist-credit']}
 
@@ -713,7 +713,7 @@ class Album(DataObject, Item):
 #            return self.metadata['format']
 
 #        elif column == 'extension':
- #           return self.metadata['extension']
+#            return self.metadata['extension']
 
         else:
             return ''
