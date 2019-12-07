@@ -62,7 +62,7 @@ from picard.ui.collectionmenu import CollectionMenu
 from picard.ui.colors import interface_colors
 from picard.ui.ratingwidget import RatingWidget
 from picard.ui.scriptsmenu import ScriptsMenu
-
+from picard.ui.widgets.tristatesortheaderview import TristateSortHeaderView
 
 class BaseAction(QtWidgets.QAction):
     NAME = "Unknown"
