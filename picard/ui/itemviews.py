@@ -656,8 +656,11 @@ class AlbumTreeView(BaseTreeView):
         self.tagger.album_removed.connect(self.remove_album)
 
     def add_album(self, album):
-        item = AlbumItem(album, True, self)
-        item.setIcon(0, AlbumItem.icon_cd)
+        if isinstance(album, NatAlbum):
+            item = NatAlbumItem(album, True)
+            self.insertTopLevelItem(0, item)
+        else:
+            item = AlbumItem(album, True, self)        item.setIcon(0, AlbumItem.icon_cd)
         for i, column in enumerate(MainPanel.columns):
             font = item.font(i)
             font.setBold(True)
@@ -786,6 +789,17 @@ class AlbumItem(TreeItem):
         # is briefly missing on Windows
         self.emitDataChanged()
 
+    def __lt__(self, other):
+        # Always show NAT entry on top, see also NatAlbumItem.__lt__
+        if isinstance(other, NatAlbumItem):
+            return not other.__lt__(self)
+        return super().__lt__(other)
+
+class NatAlbumItem(AlbumItem):
+    def __lt__(self, other):
+        # Always show NAT entry on top
+        order = self.treeWidget().header().sortIndicatorOrder()
+        return order == QtCore.Qt.AscendingOrder
 
 class TrackItem(TreeItem):
 
