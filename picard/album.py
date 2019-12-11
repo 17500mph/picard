@@ -661,7 +661,11 @@ class Album(DataObject, Item):
                 return ''
             return '{:03.0f}%'.format(self.get_num_matched_tracks() / trackcount * 100)
 
-
+        #elif column == '~filesize':
+        #    size = len(self.filesize)
+        #    if not size:
+        #        return ''
+        #    return '{:d}'.format(self.metadata.filesize() / (1024 * 1024))
 
         elif column == 'artcount':
             # CoverArt.set_metadata uses the orig_metadata.images if metadata.images is empty
@@ -697,13 +701,19 @@ class Album(DataObject, Item):
                     if track.is_linked():
                         linked_tracks += 1
                 text = '%d' % (linked_tracks)
+                return text
+
+        elif column == 'unmatchedtracks':
                 # text = '%d/%d' % (linked_tracks, len(self.tracks))
-                unmatched = self.get_num_unmatched_files()
-                if unmatched:
-                    text += ' (%d?)' % (unmatched,)
-                unsaved = self.get_num_unsaved_files()
-                if unsaved:
-                    text += ' (%d*)' % (unsaved,)
+            unmatched = self.get_num_unmatched_files()
+            if unmatched:
+                text = ' (%d?)' % (unmatched,)
+                return text
+
+        elif column == 'unsavedtracks':
+            unsaved = self.get_num_unsaved_files()
+            if unsaved:
+                text = ' (%d*)' % (unsaved,)
                 return text
 
 #        elif column == 'album':

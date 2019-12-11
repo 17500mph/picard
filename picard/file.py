@@ -307,7 +307,7 @@ class File(QtCore.QObject, Item):
             length = self.orig_metadata.length
             temp_info = {}
             for info in ('~bitrate', '~sample_rate', '~channels',
-                         '~bits_per_sample', '~format'):
+                         '~bits_per_sample', '~format', '~filesize'):
                 temp_info[info] = self.orig_metadata[info]
             # Data is copied from New to Original because New may be
             # a subclass to handle id3v23
@@ -652,6 +652,8 @@ class File(QtCore.QObject, Item):
         filename, extension = os.path.splitext(os.path.basename(self.filename))
         metadata['~filename'] = filename
         metadata['~extension'] = extension.lower()[1:]
+        metadata['~filesize'] = os.path.getsize(self.filename)
+
 
     @property
     def state(self):

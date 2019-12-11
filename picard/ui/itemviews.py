@@ -124,15 +124,17 @@ class MainPanel(QtWidgets.QSplitter):
 
     columns = [
         (N_('Title'), 'title'),
-        (N_('Title'), 'title'),
         (N_('Qty. Art'), 'artcount'),
         (N_('Matched'), 'matchedtracks'),
+        (N_('NoMatch'), 'unmatchedtracks'),
         (N_('Tracks'), 'albumtracks'),
         (N_('Completed'), '~completed'),
+        (N_('To Save'), 'unsavedtracks'),
         (N_('Length'), '~length'),
         (N_('Artist'), 'artist'),
         (N_('Cat #'), 'catalognumber'),
         (N_('Media'), 'media'),
+        (N_('Size'), '~filesize'),
     ]
 
     def __init__(self, window, parent=None):
@@ -660,7 +662,8 @@ class AlbumTreeView(BaseTreeView):
             item = NatAlbumItem(album, True)
             self.insertTopLevelItem(0, item)
         else:
-            item = AlbumItem(album, True, self)        item.setIcon(0, AlbumItem.icon_cd)
+            item = AlbumItem(album, True, self)
+            item.setIcon(0, AlbumItem.icon_cd)
         for i, column in enumerate(MainPanel.columns):
             font = item.font(i)
             font.setBold(True)

@@ -86,6 +86,8 @@ TAG_NAMES = {
     'script': N_('Script'),
     '~length': N_('Length'),
     '~rating': N_('Rating'),
+    '~filename': N_('Filename'),
+    '~dirname': N_('Directory'),
     'artists': N_('Artists'),
     'work': N_('Work'),
     'movement': N_('Movement'),
@@ -109,7 +111,7 @@ TAG_NAMES = {
 
 PRESERVED_TAGS = [
     "~bitrate", "~bits_per_sample", "~format", "~channels", "~sample_rate",
-    "~dirname", "~filename", "~extension", "~video",
+    "~dirname", "~filename", "~extension", "~video", "~filesize",
 ]
 
 
