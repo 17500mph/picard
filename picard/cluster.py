@@ -65,6 +65,7 @@ class Cluster(QtCore.QObject, Item):
         QtCore.QObject.__init__(self)
         self.item = None
         self.metadata = Metadata()
+        self.orig_metadata = Metadata()
         self.metadata['album'] = name
         self.metadata['albumartist'] = artist
         self.metadata['totaltracks'] = 0
@@ -171,24 +172,9 @@ class Cluster(QtCore.QObject, Item):
     def is_album_like(self):
         return True
 
-#
-#   columns = [
-#        (N_('Title'), 'title'),
-#        (N_('Qty. Art'), 'artcount'),
-#        (N_('Matched'), 'matchedtracks'),
-#        (N_('Tracks'), 'albumtracks'),
-#        (N_('Length'), '~length'),
-#        (N_('Artist'), 'artist'),
-#        (N_('Cat #'), 'catalognumber'),
-#        (N_('Media'), 'media'),
-#    ]
-
-
-
     def column(self, column):
         if column == 'title':
             return '%s' % (self.metadata['album'])
-
         elif column == 'matchedtracks':
             return '%d' % (len(self.files))
         elif column == 'albumtracks':
@@ -199,6 +185,37 @@ class Cluster(QtCore.QObject, Item):
             return format_time(self.metadata.length)
         elif column == 'artist':
             return self.metadata['albumartist']
+        elif column == 'tracknumber':
+            return self.metadata['totaltracks']
+        elif column == 'discnumber':
+            return self.metadata['totaldiscs']
+        elif column == 'artcount':
+            # CoverArt.set_metadata uses the orig_metadata.images if metadata.images is empty
+            # in order to show existing cover art if there's no cover art for a release. So
+            # we do the same here in order to show the number of images consistently.
+            if self.metadata.images:
+                metadata = self.metadata
+            else:
+                metadata = self.orig_metadata
+
+            number_of_images = len(metadata.images)
+            if getattr(metadata, 'has_common_images', True):
+                text = ngettext("%i img", "%i imgs",
+                                 number_of_images) % number_of_images
+                return text
+            else:
+                text = "..."
+                return text
+
+        elif column == 'albumtracks':
+            if self.tracks:
+                linked_tracks = 0
+                for track in self.tracks:
+                    if track.is_linked():
+                        linked_tracks += 1
+                text = '%d' % (len(self.tracks))
+                return text
+
         return self.metadata[column]
 
     def _lookup_finished(self, document, http, error):

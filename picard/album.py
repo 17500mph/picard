@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from collections import (
+    OrderedDict,
     defaultdict,
     namedtuple,
 )
@@ -63,7 +64,7 @@ from picard.util import (
     find_best_match,
     format_time,
     mbid_validate,
-)
+    encode_filename)
 from picard.util.imagelist import (
     add_metadata_images,
     remove_metadata_images,
@@ -72,6 +73,8 @@ from picard.util.imagelist import (
 from picard.util.textencoding import asciipunct
 
 from picard.ui.item import Item
+
+from picard.util import bytes2human
 
 # # #
 def _create_artist_node_dict(source_node):
@@ -203,6 +206,10 @@ class Album(DataObject, Item):
             m.apply_func(asciipunct)
 
         m['totaldiscs'] = len(release_node['media'])
+        m['totaltracks'] = sum([m['track-count'] for m in release_node['media']])
+        # Generate a list of unique media, but keep order of first appearance
+        all_media = [media['format'] for media in release_node['media']]
+        m['media'] = " / ".join(list(OrderedDict.fromkeys(all_media)))
 
         # Add album to collections
         add_release_to_user_collections(release_node)
@@ -594,7 +601,7 @@ class Album(DataObject, Item):
                     count += 1
         return count
 
-    def column(self, column, linked_tracks=None):
+    def column(self, column, size=0):
         if column == 'title':
             if self.status is not None:
                 title = self.status
@@ -661,11 +668,18 @@ class Album(DataObject, Item):
                 return ''
             return '{:03.0f}%'.format(self.get_num_matched_tracks() / trackcount * 100)
 
-        #elif column == '~filesize':
-        #    size = len(self.filesize)
-        #    if not size:
-        #        return ''
-        #    return '{:d}'.format(self.metadata.filesize() / (1024 * 1024))
+        elif column == '~filesize':
+            filesize = self.metadata.filesize
+            sizestr = "%s (%s)" % (bytes2human.decimal(size), bytes2human.binary(size))
+            if not filesize:
+                return sizestr
+            else:
+                return''
+
+        #size = os.path.getsize(encode_filename(file_.filename))
+        #sizestr = "%s (%s)" % (bytes2human.decimal(size), bytes2human.binary(size))
+        #info.append((_('Size:'), sizestr))
+
 
         elif column == 'artcount':
             # CoverArt.set_metadata uses the orig_metadata.images if metadata.images is empty
@@ -688,9 +702,6 @@ class Album(DataObject, Item):
                 text = "..."
 
                 return text
-
-        elif column == 'artist':
-            return self.metadata['albumartist']
 
         elif column == 'matchedtracks':
             # text = '(%d/%d' % (linked_tracks, len(self.tracks))

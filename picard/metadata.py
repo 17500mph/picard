@@ -70,6 +70,7 @@ class Metadata(MutableMapping):
     multi_valued_joiner = MULTI_VALUED_JOINER
 
     def __init__(self, *args, deleted_tags=None, images=None, length=None, **kwargs):
+        self.filesize = 0
         self._store = dict()
         self.deleted_tags = set()
         self.length = 0

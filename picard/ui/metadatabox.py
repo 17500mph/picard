@@ -44,8 +44,10 @@ from picard.util import (
 from picard.util.tags import display_tag_name
 
 from picard.ui.colors import interface_colors
-from picard.ui.edittagdialog import EditTagDialog
-
+from picard.ui.edittagdialog import (
+    EditTagDialog,
+    TagEditorDelegate,
+)
 
 class TagStatus:
 
