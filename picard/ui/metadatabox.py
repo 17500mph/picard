@@ -41,6 +41,7 @@ from picard.util import (
     thread,
     throttle,
 )
+from picard.util.preservedtags import PreservedTags
 from picard.util.tags import display_tag_name
 
 from picard.ui.colors import interface_colors
@@ -48,6 +49,7 @@ from picard.ui.edittagdialog import (
     EditTagDialog,
     TagEditorDelegate,
 )
+
 
 class TagStatus:
 
@@ -147,30 +149,23 @@ class TagDiff(object):
         return TagStatus.NOCHANGE
 
 
-class PreservedTags:
+class TableTagEditorDelegate(TagEditorDelegate):
 
-    opt_name = 'preserved_tags'
+    def createEditor(self, parent, option, index):
+        editor = super().createEditor(parent, option, index)
+        if editor and isinstance(editor, QtWidgets.QPlainTextEdit):
+            table = self.parent()
+            # Set the editor to the row height, but at least 80 pixel
+            # to allow for proper multiline editing.
+            height = max(80, table.rowHeight(index.row()) - 1)
+            editor.setMinimumSize(QtCore.QSize(0, height))
+            # Resize the row so the editor fits in. Add 1 pixel, otherwise the
+            # frame gets hidden.
+            table.setRowHeight(index.row(), editor.frameSize().height() + 1)
+        return editor
 
-    def __init__(self):
-        self._tags = self._from_config()
-
-    def _to_config(self):
-        config.setting[self.opt_name] = ", ".join(sorted(self._tags))
-
-    def _from_config(self):
-        tags = config.setting[self.opt_name].split(',')
-        return set(filter(bool, map(str.strip, tags)))
-
-    def add(self, name):
-        self._tags.add(name)
-        self._to_config()
-
-    def discard(self, name):
-        self._tags.discard(name)
-        self._to_config()
-
-    def __contains__(self, key):
-        return key in self._tags
+    def get_tag_name(self, index):
+        return index.data(QtCore.Qt.UserRole)
 
 
 class MetadataBox(QtWidgets.QTableWidget):
@@ -197,6 +192,7 @@ class MetadataBox(QtWidgets.QTableWidget):
         self.setTabKeyNavigation(False)
         self.setStyleSheet("QTableWidget {border: none;}")
         self.setAttribute(QtCore.Qt.WA_MacShowFocusRect, 1)
+        self.setItemDelegate(TableTagEditorDelegate(self))
         self.files = set()
         self.tracks = set()
         self.objects = set()
@@ -570,8 +566,19 @@ class MetadataBox(QtWidgets.QTableWidget):
             orig_item.setForeground(color)
             new_item.setForeground(color)
 
+            alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
+            tag_item.setTextAlignment(alignment)
+            orig_item.setTextAlignment(alignment)
+            new_item.setTextAlignment(alignment)
+
+            # Expand the row for multiline content, but limit the maximum
+            # row height.
+            row_height = min(self.sizeHintForRow(i), 160)
+            self.setRowHeight(i, row_height)
+
     def set_item_value(self, item, tags, name):
         text, italic = tags.display_value(name)
+        item.setData(QtCore.Qt.UserRole, name)
         item.setText(text)
         font = item.font()
         font.setItalic(italic)
