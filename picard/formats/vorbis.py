@@ -49,6 +49,7 @@ from picard.util import (
 )
 
 
+FLAC_MAX_BLOCK_SIZE = 2 ** 24 - 1  # FLAC block size is limited to a 24 bit integer
 INVALID_CHARS = re.compile('([^\x20-\x7d]|=)')
 
 
@@ -67,6 +68,32 @@ def is_valid_key(key):
     ASCII 0x20 through 0x7D, 0x3D ('=') excluded.
     """
     return INVALID_CHARS.search(key) is None
+
+
+def flac_sort_pics_after_tags(metadata_blocks):
+    """
+    Reorder the metadata_blocks so that all picture blocks are located after
+    the first Vorbis comment block.
+
+    Windows fails to read FLAC tags if the picture blocks are located before
+    the Vorbis comments. Reordering the blocks fixes this.
+    """
+    # First remember all picture blocks that are located before the tag block.
+    tagindex = 0
+    picblocks = []
+    for block in metadata_blocks:
+        if block.code == mutagen.flac.VCFLACDict.code:
+            tagindex = metadata_blocks.index(block)
+            break
+        elif block.code == mutagen.flac.Picture.code:
+            picblocks.append(block)
+    else:
+        return  # No tags found, nothing to sort
+
+    # Now move those picture block after the tag block, maintaining their order.
+    for pic in picblocks:
+        metadata_blocks.remove(pic)
+        metadata_blocks.insert(tagindex, pic)
 
 
 class VCommentFile(File):
@@ -244,7 +271,15 @@ class VCommentFile(File):
             picture.width = image.width
             picture.height = image.height
             picture.type = image_type_as_id3_num(image.maintype)
-            if self._File == mutagen.flac.FLAC:
+            if is_flac:
+                # See https://xiph.org/flac/format.html#metadata_block_picture
+                expected_block_size = (8 * 4 + len(picture.data)
+                    + len(picture.mime)
+                    + len(picture.desc.encode('UTF-8')))
+                if expected_block_size > FLAC_MAX_BLOCK_SIZE:
+                    log.error('Failed saving image to %r: Image size of %d bytes exceeds maximum FLAC block size of %d bytes',
+                        filename, expected_block_size, FLAC_MAX_BLOCK_SIZE)
+                    continue
                 file.add_picture(picture)
             else:
                 tags.setdefault("METADATA_BLOCK_PICTURE", []).append(
@@ -253,6 +288,9 @@ class VCommentFile(File):
         file.tags.update(tags)
 
         self._remove_deleted_tags(metadata, file.tags)
+
+        if is_flac:
+            flac_sort_pics_after_tags(file.metadata_blocks)
 
         kwargs = {}
         if is_flac and config.setting["remove_id3_from_flac"]:
@@ -305,7 +343,10 @@ class VCommentFile(File):
     def supports_tag(cls, name):
         unsupported_tags = ['r128_album_gain', 'r128_track_gain']
         return (bool(name) and name not in unsupported_tags
-                and is_valid_key(name))
+                and (is_valid_key(name)
+                    or name.startswith('comment:')
+                    or name.startswith('lyrics:')
+                    or name.startswith('performer:')))
 
 
 class FLACFile(VCommentFile):

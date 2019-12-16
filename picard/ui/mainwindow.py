@@ -78,6 +78,7 @@ from picard.ui.passworddialog import (
 from picard.ui.playertoolbar import Player
 from picard.ui.searchdialog.album import AlbumSearchDialog
 from picard.ui.searchdialog.track import TrackSearchDialog
+from picard.ui.statusindicator import DesktopStatusIndicator
 from picard.ui.tagsfromfilenames import TagsFromFileNamesDialog
 from picard.ui.util import (
     MultiDirsSelectDialog,
@@ -116,6 +117,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         self.ignore_selection_changes = False
         self.toolbar = None
         self.player = None
+        self.status_indicators = []
         player = Player(self)
         if player.available:
             self.player = player
@@ -161,9 +163,8 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         if not self.show_cover_art_action.isChecked():
             self.cover_art_box.hide()
 
-        self.logDialog = LogView(self)
-        self.historyDialog = HistoryView(self)
-        self.optionsDialog = None
+        self.log_dialog = LogView(self)
+        self.history_dialog = HistoryView(self)
 
         bottomLayout = QtWidgets.QHBoxLayout()
         bottomLayout.setContentsMargins(0, 0, 0, 0)
@@ -204,6 +205,11 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
             self.auto_update_check()
         self.metadata_box.restore_state()
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        if DesktopStatusIndicator:
+            self.register_status_indicator(DesktopStatusIndicator(self.windowHandle()))
+
     def closeEvent(self, event):
         if config.setting["quit_confirmation"] and not self.show_quit_confirmation():
             event.ignore()
@@ -213,6 +219,9 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
             config.persist['mediaplayer_volume'] = self.player.volume()
         self.saveWindowState()
         event.accept()
+
+    def register_status_indicator(self, indicator):
+        self.status_indicators.append(indicator)
 
     def show_quit_confirmation(self):
         unsaved_files = sum(a.get_num_unsaved_files() for a in self.tagger.albums.values())
@@ -243,6 +252,8 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         config.persist["window_state"] = self.saveState()
         isMaximized = int(self.windowState()) & QtCore.Qt.WindowMaximized != 0
         self.save_geometry()
+        self.log_dialog.save_geometry()
+        self.history_dialog.save_geometry()
         config.persist["window_maximized"] = isMaximized
         config.persist["view_cover_art"] = self.show_cover_art_action.isChecked()
         config.persist["view_toolbar"] = self.show_toolbar_action.isChecked()
@@ -268,7 +279,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
     def create_statusbar(self):
         """Creates a new status bar."""
         self.statusBar().showMessage(_("Ready"))
-        self.infostatus = InfoStatus(self)
+        infostatus = InfoStatus(self)
         self.listening_label = QtWidgets.QLabel()
         self.listening_label.setVisible(False)
         self.listening_label.setToolTip("<qt/>" + _(
@@ -276,20 +287,24 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
             "you \"Search\" or \"Open in Browser\" from Picard, clicking the "
             "\"Tagger\" button on the web page loads the release into Picard."
         ))
-        self.statusBar().addPermanentWidget(self.infostatus)
+        self.statusBar().addPermanentWidget(infostatus)
         self.statusBar().addPermanentWidget(self.listening_label)
         self.tagger.tagger_stats_changed.connect(self.update_statusbar_stats)
         self.tagger.listen_port_changed.connect(self.update_statusbar_listen_port)
+        self.register_status_indicator(infostatus)
         self.update_statusbar_stats()
 
     @throttle(100)
     def update_statusbar_stats(self):
         """Updates the status bar information."""
-        self.infostatus.setFiles(len(self.tagger.files))
-        self.infostatus.setAlbums(len(self.tagger.albums))
-        self.infostatus.setPendingFiles(File.num_pending_files)
-        ws = self.tagger.webservice
-        self.infostatus.setPendingRequests(ws.num_pending_web_requests)
+        total_files = len(self.tagger.files)
+        total_albums = len(self.tagger.albums)
+        pending_files = File.num_pending_files
+        pending_requests = self.tagger.webservice.num_pending_web_requests
+
+        for indicator in self.status_indicators:
+            indicator.update(files=total_files, albums=total_albums,
+                pending_files=pending_files, pending_requests=pending_requests)
 
     def update_statusbar_listen_port(self, listen_port):
         if listen_port:
@@ -566,14 +581,18 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
             self.check_update_action.triggered.connect(self.do_update_check)
 
     def _update_cd_lookup_actions(self, result=None, error=None):
-        drives = result
         if error:
             log.error("CDROM: Error on CD-ROM drive detection: %r", error)
-        elif not drives:
+        else:
+            self.update_cd_lookup_drives(result)
+
+    def update_cd_lookup_drives(self, drives):
+        if not drives:
             log.warning("CDROM: No CD-ROM drives found - Lookup CD functionality disabled")
         else:
             shortcut_drive = config.setting["cd_lookup_device"].split(",")[0] if len(drives) > 1 else ""
-            self.cd_lookup_action.setEnabled(True)
+            self.cd_lookup_action.setEnabled(discid is not None)
+            self.cd_lookup_menu.clear()
             for drive in drives:
                 action = self.cd_lookup_menu.addAction(drive)
                 action.setData(drive)
@@ -581,6 +600,16 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
                     # Clear existing shortcode on main action and assign it to sub-action
                     self.cd_lookup_action.setShortcut(QtGui.QKeySequence())
                     action.setShortcut(QtGui.QKeySequence(_("Ctrl+K")))
+        self._update_cd_lookup_button()
+
+    def _update_cd_lookup_button(self):
+        if len(self.cd_lookup_menu.actions()) > 1:
+            button = self.toolbar.widgetForAction(self.cd_lookup_action)
+            if button:
+                button.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
+            self.cd_lookup_action.setMenu(self.cd_lookup_menu)
+        else:
+            self.cd_lookup_action.setMenu(None)
 
     def toggle_rename_files(self, checked):
         config.setting["rename_files"] = checked
@@ -640,7 +669,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         menu.addAction(self.enable_tag_saving_action)
         menu.addSeparator()
         menu.addAction(self.options_action)
-
+		#amd Scripts Menu Access (Static Menu/Not Dynamic)
         scripts = config.setting["list_of_scripts"]
         menu = self.menuBar().addMenu(_("&Functions"))
         menu.addSeparator()
@@ -650,10 +679,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
 
         menu = self.menuBar().addMenu(_("&Tools"))
         menu.addAction(self.refresh_action)
-        if len(self.cd_lookup_menu.actions()) > 1:
-            menu.addMenu(self.cd_lookup_menu)
-        else:
-            menu.addAction(self.cd_lookup_action)
+        menu.addAction(self.cd_lookup_action)
         menu.addAction(self.autotag_action)
         menu.addAction(self.analyze_action)
         menu.addAction(self.cluster_action)
@@ -711,10 +737,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         for action in config.setting['toolbar_layout']:
             if action == 'cd_lookup_action':
                 add_toolbar_action(self.cd_lookup_action)
-                if len(self.cd_lookup_menu.actions()) > 1:
-                    button = toolbar.widgetForAction(self.cd_lookup_action)
-                    button.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
-                    button.setMenu(self.cd_lookup_menu)
+                self._update_cd_lookup_button()
             elif action == 'separator':
                 toolbar.addSeparator()
             else:
@@ -892,28 +915,20 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         self.show_options("about")
 
     def show_options(self, page=None):
-        if not self.optionsDialog:
-            self.optionsDialog = OptionsDialog(page, self)
-            self.optionsDialog.finished.connect(self.on_options_closed)
-        self.optionsDialog.show()
-        self.optionsDialog.raise_()
-        self.optionsDialog.activateWindow()
-
-    def on_options_closed(self):
-        self.optionsDialog = None
+        OptionsDialog.show_instance(page, self)
 
     def show_help(self):
         webbrowser2.goto('documentation')
 
     def show_log(self):
-        self.logDialog.show()
-        self.logDialog.raise_()
-        self.logDialog.activateWindow()
+        self.log_dialog.show()
+        self.log_dialog.raise_()
+        self.log_dialog.activateWindow()
 
     def show_history(self):
-        self.historyDialog.show()
-        self.historyDialog.raise_()
-        self.historyDialog.activateWindow()
+        self.history_dialog.show()
+        self.history_dialog.raise_()
+        self.history_dialog.activateWindow()
 
     def open_bug_report(self):
         webbrowser2.goto('troubleshooting')

@@ -57,6 +57,7 @@ class Cluster(QtCore.QObject, Item):
         'album': 17,
         'albumartist': 6,
         'totaltracks': 5,
+        'releasetype': 10,
         'releasecountry': 2,
         'format': 2,
     }
@@ -335,7 +336,6 @@ class Cluster(QtCore.QObject, Item):
 
     def enable_update_metadata_images(self, enabled):
         self.update_metadata_images_enabled = enabled
-
 
     def update_metadata_images(self):
         if self.update_metadata_images_enabled and self.can_show_coverart:

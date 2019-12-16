@@ -279,13 +279,21 @@ class MetadataBox(QtWidgets.QTableWidget):
         super().closeEditor(editor, hint)
         tag = self.tag_diff.tag_names[self.editing.row()]
         old = self.tag_diff.new[tag]
-        new = [editor.text()]
+        new = [self._get_editor_value(editor)]
         if old == new:
             self.editing.setText(old[0])
         else:
             self.set_tag_values(tag, new)
         self.editing = None
         self.update()
+
+    @staticmethod
+    def _get_editor_value(editor):
+        if hasattr(editor, 'text'):
+            return editor.text()
+        elif hasattr(editor, 'toPlainText'):
+            return editor.toPlainText()
+        return ''
 
     def contextMenuEvent(self, event):
         menu = QtWidgets.QMenu(self)

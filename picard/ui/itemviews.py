@@ -64,6 +64,7 @@ from picard.ui.ratingwidget import RatingWidget
 from picard.ui.scriptsmenu import ScriptsMenu
 from picard.ui.widgets.tristatesortheaderview import TristateSortHeaderView
 
+
 class BaseAction(QtWidgets.QAction):
     NAME = "Unknown"
     MENU = []
@@ -124,17 +125,17 @@ class MainPanel(QtWidgets.QSplitter):
 
     columns = [
         (N_('Title'), 'title'),
-        (N_('Qty. Art'), 'artcount'),
-        (N_('Matched'), 'matchedtracks'),
-        (N_('NoMatch'), 'unmatchedtracks'),
-        (N_('Tracks'), 'albumtracks'),
-        (N_('Completed'), '~completed'),
-        (N_('To Save'), 'unsavedtracks'),
+        (N_('Imgs.'), 'artcount'),#amd
+        (N_('Matched'), 'matchedtracks'),#amd
+        (N_('NoMatch'), 'unmatchedtracks'),#amd
+        (N_('Tracks'), 'albumtracks'),#amd
+        (N_('Completed'), '~completed'),#amd
+        (N_('To Save'), 'unsavedtracks'),#amd
         (N_('Length'), '~length'),
         (N_('Artist'), 'artist'),
-        (N_('Cat #'), 'catalognumber'),
-        (N_('Media'), 'media'),
-        (N_('Size'), '~filesize'),
+        (N_('Cat #'), 'catalognumber'),#amd
+        (N_('Media'), 'media'),#amd
+        (N_('Size'), '~filesize'),#amd
         (N_('Album Artist'), 'albumartist'),
         (N_('Composer'), 'composer'),
         (N_('Album'), 'album'),
@@ -143,11 +144,11 @@ class MainPanel(QtWidgets.QSplitter):
         (N_('Disc No.'), 'discnumber'),
         (N_('Barcode'), 'barcode'),
         (N_('Genre'), 'genre'),
-        (N_('Bitrate'), '~bitrate'),
-        (N_('Ext'), '~extension'),
-        (N_('Format'), '~format'),
-        (N_('Path'), '~dirname'),
-        (N_('File'), '~filename'),
+        (N_('Bitrate'), '~bitrate'),#amd
+        (N_('Ext'), '~extension'),#amd
+        (N_('Format'), '~format'),#amd
+        (N_('Path'), '~dirname'),#amd
+        (N_('File'), '~filename'),#amd
 
     ]
     def __init__(self, window, parent=None):
@@ -266,58 +267,67 @@ class MainPanel(QtWidgets.QSplitter):
         else:
             self.update_current_view()
 
+
 class ConfigurableColumnsHeader(TristateSortHeaderView):
 
-        def __init__(self, parent=None):
-            super().__init__(QtCore.Qt.Horizontal, parent)
-            self._visible_columns = set([0])
+    def __init__(self, parent=None):
+        super().__init__(QtCore.Qt.Horizontal, parent)
+        self._visible_columns = set([0])
 
-            # The following are settings applied to default headers
-            # of QTreeView and QTreeWidget.
-            self.setSectionsMovable(True)
-            self.setStretchLastSection(True)
-            self.setDefaultAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-            self.setSectionsClickable(False)
+        # The following are settings applied to default headers
+        # of QTreeView and QTreeWidget.
+        self.setSectionsMovable(True)
+        self.setStretchLastSection(True)
+        self.setDefaultAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.setSectionsClickable(False)
 
-            # enable sorting, but don't actually use it by default
-            # XXX it would be nice to be able to go to the 'no sort' mode, but the
-            #     internal model that QTreeWidget uses doesn't support it
-            self.setSortIndicator(-1, QtCore.Qt.AscendingOrder)
-            self.setDefaultSectionSize(100)
+        # enable sorting, but don't actually use it by default
+        # XXX it would be nice to be able to go to the 'no sort' mode, but the
+        #     internal model that QTreeWidget uses doesn't support it
+        self.setSortIndicator(-1, QtCore.Qt.AscendingOrder)
+        self.setDefaultSectionSize(100)
 
-        def show_column(self, column, show):
-            if column == 0:  # The first column is fixed
-                return
-            self.parent().setColumnHidden(column, not show)
-            if show:
-                if self.sectionSize(column) == 0:
-                    self.resizeSection(column, self.defaultSectionSize())
-                self._visible_columns.add(column)
-            elif column in self._visible_columns:
-                self._visible_columns.remove(column)
+    def show_column(self, column, show):
+        if column == 0:  # The first column is fixed
+            return
+        self.parent().setColumnHidden(column, not show)
+        if show:
+            if self.sectionSize(column) == 0:
+                self.resizeSection(column, self.defaultSectionSize())
+            self._visible_columns.add(column)
+        elif column in self._visible_columns:
+            self._visible_columns.remove(column)
 
-        def update_visible_columns(self, columns):
-            for i, column in enumerate(MainPanel.columns):
-                self.show_column(i, i in columns)
+    def update_visible_columns(self, columns):
+        for i, column in enumerate(MainPanel.columns):
+            self.show_column(i, i in columns)
 
-        @property
-        def visible_columns(self):
-            return self._visible_columns
+    @property
+    def visible_columns(self):
+        return self._visible_columns
 
-        def contextMenuEvent(self, event):
-            menu = QtWidgets.QMenu(self)
+    def contextMenuEvent(self, event):
+        menu = QtWidgets.QMenu(self)
 
-            for i, column in enumerate(MainPanel.columns):
-                if i == 0:
-                    continue
-                action = QtWidgets.QAction(column[0], self.parent())
-                action.setCheckable(True)
-                action.setChecked(i in self._visible_columns)
-                action.triggered.connect(partial(self.show_column, i))
-                menu.addAction(action)
+        for i, column in enumerate(MainPanel.columns):
+            if i == 0:
+                continue
+            action = QtWidgets.QAction(_(column[0]), self.parent())
+            action.setCheckable(True)
+            action.setChecked(i in self._visible_columns)
+            action.triggered.connect(partial(self.show_column, i))
+            menu.addAction(action)
 
-            menu.exec_(event.globalPos())
-            event.accept()
+        menu.addSeparator()
+        restore_action = QtWidgets.QAction(_('Restore default columns'), self.parent())
+        restore_action.triggered.connect(self.restore_defaults)
+        menu.addAction(restore_action)
+
+        menu.exec_(event.globalPos())
+        event.accept()
+
+    def restore_defaults(self):
+        self.parent().restore_default_columns()
 
 
 class BaseTreeView(QtWidgets.QTreeWidget):
@@ -483,7 +493,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
             menu.addSeparator()
 
         # Using type here is intentional. isinstance will return true for the
-        # NatAlbum instance, which can't be part of a collection.
+        # NatAlbum instance, which can't be part of a collection.
         # pylint: disable=C0123
         selected_albums = [a for a in self.window.selected_objects if type(a) == Album]
         if selected_albums:
@@ -528,23 +538,25 @@ class BaseTreeView(QtWidgets.QTreeWidget):
 
     @restore_method
     def restore_state(self):
-        header = self.header()
-        header.update_visible_columns([int(i) for i in config.persist[self.view_columns.name]])
-        sizes = config.persist[self.view_sizes.name]
-        sizes = sizes.split(" ")
-        for i in range(self.columnCount() - 1):
-            try:
-                size = int(sizes[i])
-            except IndexError:
-                size = header.defaultSectionSize()
-            header.resizeSection(i, size)
+        self._restore_state(config.persist[self.header_state.name])
 
     def save_state(self):
+        config.persist[self.header_state.name] = self.header().saveState()
+
+    def restore_default_columns(self):
+        self._restore_state(None)
+
+    def _restore_state(self, header_state):
         header = self.header()
-        config.persist[self.view_columns.name] = list(header.visible_columns)
-        cols = range(self.columnCount() - 1)
-        sizes = " ".join(str(header.sectionSize(i)) for i in cols)
-        config.persist[self.view_sizes.name] = sizes
+        if header_state:
+            header.restoreState(header_state)
+            for i in range(0, self.columnCount()):
+                header.show_column(i, not self.isColumnHidden(i))
+        else:
+            header.update_visible_columns([0, 1, 2])
+            for i, size in enumerate([250, 50, 100]):
+                header.resizeSection(i, size)
+            self.sortByColumn(-1, QtCore.Qt.AscendingOrder)
 
     def supportedDropActions(self):
         return QtCore.Qt.CopyAction | QtCore.Qt.MoveAction
@@ -684,8 +696,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
 
 class FileTreeView(BaseTreeView):
 
-    view_columns = config.ListOption("persist", "file_view_columns", [0, 1, 2])
-    view_sizes = config.TextOption("persist", "file_view_sizes", "250 50 100")
+    header_state = config.Option("persist", "file_view_header_state", QtCore.QByteArray())
 
     def __init__(self, window, parent=None):
         super().__init__(window, parent)
@@ -715,8 +726,7 @@ class FileTreeView(BaseTreeView):
 
 class AlbumTreeView(BaseTreeView):
 
-    view_columns = config.ListOption("persist", "album_view_columns", [0, 1, 2])
-    view_sizes = config.TextOption("persist", "album_view_sizes", "250 50 100")
+    header_state = config.Option("persist", "album_view_header_state", QtCore.QByteArray())
 
     def __init__(self, window, parent=None):
         super().__init__(window, parent)
@@ -731,7 +741,7 @@ class AlbumTreeView(BaseTreeView):
             self.insertTopLevelItem(0, item)
         else:
             item = AlbumItem(album, True, self)
-            item.setIcon(0, AlbumItem.icon_cd)
+        item.setIcon(0, AlbumItem.icon_cd)
         for i, column in enumerate(MainPanel.columns):
             font = item.font(i)
             font.setBold(True)
@@ -868,11 +878,13 @@ class AlbumItem(TreeItem):
             return not other.__lt__(self)
         return super().__lt__(other)
 
+
 class NatAlbumItem(AlbumItem):
     def __lt__(self, other):
         # Always show NAT entry on top
         order = self.treeWidget().header().sortIndicatorOrder()
         return order == QtCore.Qt.AscendingOrder
+
 
 class TrackItem(TreeItem):
 

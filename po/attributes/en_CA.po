@@ -2,12 +2,13 @@
 # Translators:
 # kepstin <calvin.walton@kepstin.ca>, 2013-2014
 # kepstin <calvin.walton@kepstin.ca>, 2012
+# Ivan Dobsky, 2019
 # navap <pavan@chander.ca>, 2012
 msgid ""
 msgstr ""
 "Project-Id-Version: MusicBrainz\n"
-"PO-Revision-Date: 2019-08-08 09:30+0000\n"
-"Last-Translator: yvanz\n"
+"PO-Revision-Date: 2019-10-21 23:42+0000\n"
+"Last-Translator: Michael Wiencek <mwtuea@gmail.com>\n"
 "Language-Team: English (Canada) (http://www.transifex.com/musicbrainz/musicbrainz/language/en_CA/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -93,7 +94,7 @@ msgstr "8cm CD"
 #: DB:medium_format/name:40
 msgctxt "medium_format"
 msgid "8cm CD+G"
-msgstr "8cm CD+G"
+msgstr ""
 
 #: DB:medium_format/description:58
 msgctxt "medium_format"
@@ -310,7 +311,7 @@ msgstr ""
 #: DB:series_type/description:5
 msgctxt "series_type"
 msgid "A series of works which form a catalogue of classical compositions."
-msgstr ""
+msgstr "A series of works which form a catalogue of classical compositions."
 
 #: DB:series_type/description:4
 msgctxt "series_type"
@@ -570,7 +571,7 @@ msgctxt "work_type"
 msgid ""
 "An audio drama is a dramatized, purely acoustic performance, broadcast on "
 "radio or published on an audio medium (tape, CD, etc.)."
-msgstr ""
+msgstr "An audio drama is a dramatized, purely acoustic performance, broadcast on radio or published on an audio medium (tape, CD, etc.)."
 
 #: DB:event_type/description:2
 msgctxt "event_type"
@@ -692,7 +693,7 @@ msgstr ""
 #: DB:editor_collection_type/name:7
 msgctxt "collection_type"
 msgid "Area"
-msgstr "Area"
+msgstr ""
 
 #: DB:area_alias_type/name:1
 msgctxt "alias_type"
@@ -1200,12 +1201,12 @@ msgstr ""
 #: DB:medium_format/name:35
 msgctxt "medium_format"
 msgid "Blu-spec CD"
-msgstr "Blu-spec CD"
+msgstr ""
 
 #: DB:release_packaging/name:9
 msgctxt "release_packaging"
 msgid "Book"
-msgstr "Book"
+msgstr ""
 
 #: DB:cover_art_archive.art_type/name:3
 msgctxt "cover_art_type"
@@ -1361,7 +1362,7 @@ msgstr "CD"
 #: DB:medium_format/name:39
 msgctxt "medium_format"
 msgid "CD+G"
-msgstr "CD+G"
+msgstr ""
 
 #: DB:medium_format/name:33
 msgctxt "medium_format"
@@ -1442,12 +1443,12 @@ msgstr "Cassette"
 #: DB:release_packaging/name:8
 msgctxt "release_packaging"
 msgid "Cassette Case"
-msgstr "Cassette Case"
+msgstr ""
 
 #: DB:series_type/name:5
 msgctxt "series_type"
 msgid "Catalogue"
-msgstr ""
+msgstr "Catalogue"
 
 #: DB:work_attribute_type_allowed_value/value:291
 msgctxt "work_attribute_type_allowed_value"
@@ -1472,7 +1473,7 @@ msgstr ""
 #: DB:artist_type/name:4
 msgctxt "artist_type"
 msgid "Character"
-msgstr "Character"
+msgstr ""
 
 #: DB:artist_type/name:6
 msgctxt "artist_type"
@@ -1940,7 +1941,7 @@ msgstr "Distributor"
 #: DB:area_type/name:5
 msgctxt "area_type"
 msgid "District"
-msgstr "District"
+msgstr ""
 
 #: DB:area_type/description:5
 msgctxt "area_type"
@@ -2192,7 +2193,7 @@ msgstr ""
 #: DB:editor_collection_type/name:4
 msgctxt "collection_type"
 msgid "Event"
-msgstr "Event"
+msgstr ""
 
 #: DB:event_alias_type/name:1
 msgctxt "alias_type"
@@ -2709,7 +2710,7 @@ msgstr "HDCD"
 #: DB:medium_format/name:37
 msgctxt "medium_format"
 msgid "HQCD"
-msgstr "HQCD"
+msgstr ""
 
 #: DB:work_attribute_type_allowed_value/value:736
 msgctxt "work_attribute_type_allowed_value"
@@ -2974,7 +2975,7 @@ msgstr ""
 #: DB:medium_format/name:38
 msgctxt "medium_format"
 msgid "Hybrid SACD"
-msgstr "Hybrid SACD"
+msgstr ""
 
 #: DB:medium_format/name:63
 msgctxt "medium_format"
@@ -3126,7 +3127,7 @@ msgstr ""
 #: DB:editor_collection_type/name:9
 msgctxt "collection_type"
 msgid "Instrument"
-msgstr "Instrument"
+msgstr ""
 
 #: DB:instrument_alias_type/name:1
 msgctxt "alias_type"
@@ -3738,7 +3739,7 @@ msgstr ""
 #: DB:editor_collection_type/name:10
 msgctxt "collection_type"
 msgid "Label"
-msgstr "Label"
+msgstr ""
 
 #: DB:label_alias_type/name:1
 msgctxt "alias_type"
@@ -4055,6 +4056,11 @@ msgctxt "work_attribute_type_allowed_value"
 msgid "Mevlidişerif"
 msgstr ""
 
+#: DB:medium_format/name:83
+msgctxt "medium_format"
+msgid "Microcassette"
+msgstr ""
+
 #: DB:medium_format/name:6
 msgctxt "medium_format"
 msgid "MiniDisc"
@@ -4208,7 +4214,7 @@ msgstr ""
 #: DB:area_type/name:4
 msgctxt "area_type"
 msgid "Municipality"
-msgstr "Municipality"
+msgstr ""
 
 #: DB:area_type/description:4
 msgctxt "area_type"
@@ -4964,7 +4970,7 @@ msgstr "Piano Roll"
 #: DB:editor_collection_type/name:11
 msgctxt "collection_type"
 msgid "Place"
-msgstr "Place"
+msgstr ""
 
 #: DB:place_alias_type/name:1
 msgctxt "alias_type"
@@ -5471,7 +5477,7 @@ msgstr ""
 #: DB:medium_format/name:36
 msgctxt "medium_format"
 msgid "SHM-CD"
-msgstr "SHM-CD"
+msgstr ""
 
 #: DB:medium_format/name:57
 msgctxt "medium_format"
@@ -5672,7 +5678,7 @@ msgstr ""
 #: DB:editor_collection_type/name:14
 msgctxt "collection_type"
 msgid "Series"
-msgstr "Series"
+msgstr ""
 
 #: DB:series_alias_type/name:1
 msgctxt "alias_type"
@@ -6612,7 +6618,7 @@ msgstr ""
 #: DB:editor_collection_type/name:15
 msgctxt "collection_type"
 msgid "Work"
-msgstr "Work"
+msgstr ""
 
 #: DB:work_alias_type/name:1
 msgctxt "alias_type"

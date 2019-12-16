@@ -25,6 +25,7 @@ from PyQt5 import (
 
 class TristateSortHeaderView(QtWidgets.QHeaderView):
     """A QHeaderView implementation supporting tristate sorting.
+
     A column can either be sorted ascending, descending or not sorted. The view
     toggles through these states by clicking on a section header.
     """

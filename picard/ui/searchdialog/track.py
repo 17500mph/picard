@@ -141,7 +141,7 @@ class TrackSearchDialog(SearchDialog):
             track = obj[0]
             self.table.insertRow(row)
             self.set_table_item(row, 'name',    track, "title")
-            self.set_table_item(row, 'length',  track, "length")
+            self.set_table_item(row, 'length',  track, "~length", sortkey=track.length)
             self.set_table_item(row, 'artist',  track, "artist")
             self.set_table_item(row, 'release', track, "album")
             self.set_table_item(row, 'date',    track, "date")

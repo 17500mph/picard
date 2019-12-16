@@ -63,12 +63,14 @@ def setup_gettext(localedir, ui_language=None, logger=None):
                 import Foundation
                 defaults = Foundation.NSUserDefaults.standardUserDefaults()
                 current_locale = defaults.objectForKey_('AppleLanguages')[0]
+                current_locale = current_locale.replace('-', '_')
                 locale.setlocale(locale.LC_ALL, current_locale)
             except Exception as e:
                 logger(e)
         else:
             try:
-                current_locale = locale.setlocale(locale.LC_ALL, '')
+                locale.setlocale(locale.LC_ALL, '')
+                current_locale = '.'.join(locale.getlocale(locale.LC_MESSAGES))
             except Exception as e:
                 logger(e)
     os.environ['LANGUAGE'] = os.environ['LANG'] = current_locale
@@ -77,33 +79,19 @@ def setup_gettext(localedir, ui_language=None, logger=None):
     try:
         logger("Loading gettext translation, localedir=%r", localedir)
         trans = gettext.translation("picard", localedir)
-        trans.install(True)
-        _ngettext = trans.ngettext
         logger("Loading gettext translation (picard-countries), localedir=%r", localedir)
         trans_countries = gettext.translation("picard-countries", localedir)
-        _gettext_countries = trans_countries.gettext
         logger("Loading gettext translation (picard-attributes), localedir=%r", localedir)
         trans_attributes = gettext.translation("picard-attributes", localedir)
-        _gettext_attributes = trans_attributes.gettext
     except IOError as e:
         logger(e)
-        builtins.__dict__['_'] = lambda a: a
+        trans = gettext.NullTranslations()
+        trans_countries = gettext.NullTranslations()
+        trans_attributes = gettext.NullTranslations()
 
-        def _ngettext(a, b, c):
-            if c == 1:
-                return a
-            else:
-                return b
-
-        def _gettext_countries(msg):
-            return msg
-
-        def _gettext_attributes(msg):
-            return msg
-
-    builtins.__dict__['ngettext'] = _ngettext
-    builtins.__dict__['gettext_countries'] = _gettext_countries
-    builtins.__dict__['gettext_attributes'] = _gettext_attributes
+    trans.install(['ngettext'])
+    builtins.__dict__['gettext_countries'] = trans_countries.gettext
+    builtins.__dict__['gettext_attributes'] = trans_attributes.gettext
 
     logger("_ = %r", _)
     logger("N_ = %r", N_)

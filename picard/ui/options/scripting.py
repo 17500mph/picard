@@ -39,6 +39,7 @@ from picard.ui.options import (
     register_options_page,
 )
 from picard.ui.ui_options_script import Ui_ScriptingOptionsPage
+from picard.ui.ui_scriptitem import Ui_ScriptItem
 
 
 class TaggerScriptSyntaxHighlighter(QtGui.QSyntaxHighlighter):
@@ -113,63 +114,23 @@ class TaggerScriptSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 class AdvancedScriptItem(QtWidgets.QWidget):
     """Custom widget for script list items"""
 
-    _CHECKBOX_POS = 0
-    _NAME_POS = 1
-    _BUTTON_UP = 2
-    _BUTTON_DOWN = 3
-    _BUTTON_OTHER = 4
-
-    def __init__(self, name=None, state=True, parent=None):
+    def __init__(self, name, state=True, parent=None):
         super().__init__(parent)
-        layout = QtWidgets.QGridLayout()
-        layout.setHorizontalSpacing(5)
-        layout.setVerticalSpacing(2)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(layout)
-
-        checkbox = QtWidgets.QCheckBox()
-        checkbox.setChecked(state)
-        checkbox.setMaximumSize(QtCore.QSize(22, 22))
-        layout.addWidget(checkbox, 0, self._CHECKBOX_POS)
-
-        layout.addWidget(QtWidgets.QLabel(name), 0, self._NAME_POS)
-
-        up_button = QtWidgets.QToolButton()
-        up_button.setArrowType(QtCore.Qt.UpArrow)
-        up_button.setMaximumSize(QtCore.QSize(16, 16))
-        up_button.setToolTip(_("Move script up"))
-        down_button = QtWidgets.QToolButton()
-        down_button.setArrowType(QtCore.Qt.DownArrow)
-        down_button.setMaximumSize(QtCore.QSize(16, 16))
-        down_button.setToolTip(_("Move script down"))
-        layout.addWidget(up_button, 0, self._BUTTON_UP)
-        layout.addWidget(down_button, 0, self._BUTTON_DOWN)
-
-        other_button = QtWidgets.QToolButton()
-        other_button.setText("...")
-        other_button.setAutoRaise(True)
-        other_button.setMaximumSize(QtCore.QSize(16, 16))
-        other_button.setToolTip(_("Other options"))
+        self.ui = Ui_ScriptItem()
+        self.ui.setupUi(self)
+        self.update_name(name)
         menu = QtWidgets.QMenu()
         menu.addAction(_("Rename script"))
         menu.addAction(_("Remove script"))
+        self.ui.checkbox.setChecked(state)
         self.menu = menu
-        other_button.setMenu(menu)
-        # remove menu indicator
-        other_button.setStyleSheet('QToolButton::menu-indicator { image: none; }')
-        other_button.clicked.connect(other_button.showMenu)
-
-        layout.addWidget(other_button, 0, self._BUTTON_OTHER)
+        self.ui.other_button.setMenu(menu)
 
     def set_up_connection(self, move_up):
-        layout = self.layout()
-        up = layout.itemAtPosition(0, self._BUTTON_UP).widget()
-        up.clicked.connect(move_up)
+        self.ui.up_button.clicked.connect(move_up)
 
     def set_down_connection(self, move_down):
-        layout = self.layout()
-        down = layout.itemAtPosition(0, self._BUTTON_DOWN).widget()
-        down.clicked.connect(move_down)
+        self.ui.down_button.clicked.connect(move_down)
 
     def set_remove_connection(self, remove):
         menu_options = self.menu.actions()
@@ -180,19 +141,13 @@ class AdvancedScriptItem(QtWidgets.QWidget):
         menu_options[0].triggered.connect(rename)
 
     def set_checkbox_connection(self, check_state):
-        layout = self.layout()
-        checkbox = layout.itemAtPosition(0, self._CHECKBOX_POS).widget()
-        checkbox.stateChanged.connect(check_state)
+        self.ui.checkbox.stateChanged.connect(check_state)
 
     def update_name(self, name):
-        layout = self.layout()
-        name_label = layout.itemAtPosition(0, self._NAME_POS).widget()
-        name_label.setText(name)
+        self.ui.name_label.setText(name)
 
     def checkbox_state(self):
-        layout = self.layout()
-        checkbox = layout.itemAtPosition(0, self._CHECKBOX_POS).widget()
-        return checkbox.isChecked()
+        return self.ui.checkbox.isChecked()
 
 
 class ScriptItem:

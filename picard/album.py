@@ -64,7 +64,7 @@ from picard.util import (
     find_best_match,
     format_time,
     mbid_validate,
-    encode_filename)
+)
 from picard.util.imagelist import (
     add_metadata_images,
     remove_metadata_images,
@@ -74,9 +74,7 @@ from picard.util.textencoding import asciipunct
 
 from picard.ui.item import Item
 
-from picard.util import bytes2human
 
-# # #
 def _create_artist_node_dict(source_node):
     return {x['artist']['id']: x['artist'] for x in source_node['artist-credit']}
 
@@ -206,10 +204,6 @@ class Album(DataObject, Item):
             m.apply_func(asciipunct)
 
         m['totaldiscs'] = len(release_node['media'])
-        m['totaltracks'] = sum([m['track-count'] for m in release_node['media']])
-        # Generate a list of unique media, but keep order of first appearance
-        all_media = [media['format'] for media in release_node['media']]
-        m['media'] = " / ".join(list(OrderedDict.fromkeys(all_media)))
 
         # Add album to collections
         add_release_to_user_collections(release_node)
@@ -280,8 +274,9 @@ class Album(DataObject, Item):
 
         if not self._tracks_loaded:
             artists = set()
-            totalalbumtracks = 0
+            all_media = []
             absolutetracknumber = 0
+
             va = self._new_metadata['musicbrainz_albumartistid'] == VARIOUS_ARTISTS_ID
 
             djmix_ars = {}
@@ -293,6 +288,9 @@ class Album(DataObject, Item):
                 mm.copy(self._new_metadata)
                 medium_to_metadata(medium_node, mm)
                 discpregap = False
+                format = medium_node.get('format')
+                if format:
+                    all_media.append(format)
 
                 for dj in djmix_ars.get(mm["discnumber"], []):
                     mm.add("djmixer", dj)
@@ -321,7 +319,10 @@ class Album(DataObject, Item):
                         track = self._finalize_loading_track(track_node, mm, artists, va, absolutetracknumber, discpregap)
                         track.metadata['~datatrack'] = "1"
 
-            totalalbumtracks = str(absolutetracknumber)
+            totalalbumtracks = absolutetracknumber
+            self._new_metadata['~totalalbumtracks'] = totalalbumtracks
+            # Generate a list of unique media, but keep order of first appearance
+            self._new_metadata['media'] = " / ".join(list(OrderedDict.fromkeys(all_media)))
 
             for track in self._new_tracks:
                 track.metadata["~totalalbumtracks"] = totalalbumtracks
@@ -668,13 +669,10 @@ class Album(DataObject, Item):
                 return ''
             return '{:03.0f}%'.format(self.get_num_matched_tracks() / trackcount * 100)
 
+
         elif column == '~filesize':
-            filesize = self.metadata.filesize
-            sizestr = "%s (%s)" % (bytes2human.decimal(size), bytes2human.binary(size))
-            if not filesize:
-                return sizestr
-            else:
-                return''
+            totalsize = sum(f.metadata.filesize for f in self.iterfiles())
+            return "%s (%s)" % (bytes2human.decimal(totalsize), bytes2human.binary(totalsize))
 
         #size = os.path.getsize(encode_filename(file_.filename))
         #sizestr = "%s (%s)" % (bytes2human.decimal(size), bytes2human.binary(size))

@@ -65,6 +65,7 @@ from picard.ui.item import Item
 
 
 class File(QtCore.QObject, Item):
+
     metadata_images_changed = QtCore.pyqtSignal()
 
     NAME = None
@@ -85,9 +86,10 @@ class File(QtCore.QObject, Item):
         "album": 5,
         "length": 10,
         "totaltracks": 4,
-        "releasetype": 20,
+        "releasetype": 14,
         "releasecountry": 2,
         "format": 2,
+        "isvideo": 2,
     }
 
     class PreserveTimesStatError(Exception):
@@ -197,7 +199,7 @@ class File(QtCore.QObject, Item):
             for tag in deleted_tags:
                 del self.metadata[tag]
         for tag, values in saved_metadata.items():
-            self.metadata.set(tag, values)
+            self.metadata[tag] = values
 
         if acoustid and "acoustid_id" not in metadata.deleted_tags:
             self.metadata["acoustid_id"] = acoustid
@@ -227,7 +229,7 @@ class File(QtCore.QObject, Item):
             # https://docs.python.org/3/library/os.html#os.utime
             # Since Python 3.3, ns parameter is available
             # The best way to preserve exact times is to use the st_atime_ns and st_mtime_ns
-            #  fields from the os.stat() result object with the ns parameter to utime.
+            # fields from the os.stat() result object with the ns parameter to utime.
             st = os.stat(filename)
         except OSError as why:
             errmsg = "Couldn't read timestamps from %r: %s" % (filename, why)
@@ -257,11 +259,7 @@ class File(QtCore.QObject, Item):
             if config.setting["preserve_timestamps"]:
                 try:
                     self._preserve_times(old_filename, save)
-                except self.PreserveTimesStatError as why:
-                    log.warning(why)
-                    #  we didn't save the file yet, bail out
-                    return None
-                except self.FilePreserveTimesUtimeError as why:
+                except self.PreserveTimesUtimeError as why:
                     log.warning(why)
             else:
                 save()
@@ -445,7 +443,8 @@ class File(QtCore.QObject, Item):
         log.debug("Moving file %r => %r", old_filename, new_filename)
         shutil.move(old_filename, new_filename)
         return new_filename
-    #amd: Added change of duplicate file handling - Moved appended (#) from filename to directory level.
+
+    # amd: Added change of duplicate file handling - Moved appended (#) from filename to directory level.
     #   In effect produces automatic duplicate handling as there will not be two copies of the same Renaming Script
     #   result in any directory. **Depending on detail of file naming structure. More detailed file names may result
     #   in similarly, but not identically named files in the output directory. e.g., there will -never- be more than
@@ -492,7 +491,7 @@ class File(QtCore.QObject, Item):
         new_path = os.path.dirname(new_filename)
         old_path = os.path.dirname(old_filename)
         if new_path == old_path:
-            #  skip, same directory, nothing to move
+            # skip, same directory, nothing to move
             return
         patterns = config.setting["move_additional_files_pattern"]
         pattern_regexes = set()
@@ -581,15 +580,17 @@ class File(QtCore.QObject, Item):
         names = set(new_metadata.keys())
         names.update(self.orig_metadata.keys())
         clear_existing_tags = config.setting["clear_existing_tags"]
+        ignored_tags = config.setting["compare_ignore_tags"]
         for name in names:
-            if not name.startswith('~') and self.supports_tag(name):
+            if (not name.startswith('~') and self.supports_tag(name)
+                and name not in ignored_tags):
                 new_values = new_metadata.getall(name)
                 if not (new_values or clear_existing_tags
                         or name in new_metadata.deleted_tags):
                     continue
                 orig_values = self.orig_metadata.getall(name)
                 if orig_values != new_values:
-                    self.similarity = self.orig_metadata.compare(new_metadata)
+                    self.similarity = self.orig_metadata.compare(new_metadata, ignored_tags)
                     if self.state == File.NORMAL:
                         self.state = File.CHANGED
                     break
@@ -654,7 +655,6 @@ class File(QtCore.QObject, Item):
         metadata['~extension'] = extension.lower()[1:]
         metadata['~filesize'] = os.path.getsize(self.filename)
 
-
     @property
     def state(self):
         """Current state of the File object"""
@@ -711,6 +711,7 @@ class File(QtCore.QObject, Item):
                 statusbar(N_("File '%(filename)s' identified!"))
                 (track_id, release_group_id, release_id, node) = trackmatch
                 if lookuptype == File.LOOKUP_ACOUSTID:
+                    self.metadata['acoustid_id'] = node.get('acoustid')
                     self.tagger.acoustidmanager.add(self, track_id)
                 if release_group_id is not None:
                     releasegroup = self.tagger.get_release_group_by_id(release_group_id)
@@ -736,13 +737,12 @@ class File(QtCore.QObject, Item):
             return None
         else:
             track_id = best_match.result.track['id']
-            release_group_id, release_id, node = None, None, None
+            release_group_id, release_id = None, None
 
             if best_match.result.release:
                 release_group_id = best_match.result.releasegroup['id']
                 release_id = best_match.result.release['id']
-            elif 'title' in best_match.result.track:
-                node = best_match.result.track
+            node = best_match.result.track
             return (track_id, release_group_id, release_id, node)
 
     def lookup_metadata(self):
