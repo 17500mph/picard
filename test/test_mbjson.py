@@ -117,7 +117,7 @@ class RecordingTest(MBJSONTest):
         self.assertEqual(m['work'], 'Thinking Out Loud')
         self.assertEqual(m['writer'], 'Ed Sheeran; Amy Wadge')
         self.assertEqual(m['~artists_sort'], 'Sheeran, Ed')
-        self.assertEqual(m['~length'], '4:41')
+        self.assertEqual(m['~length'], '4m41s')
         self.assertEqual(m['~recordingtitle'], 'Thinking Out Loud')
         self.assertEqual(t.genres, {
             'blue-eyed soul': 1,
@@ -180,7 +180,7 @@ class TrackTest(MBJSONTest):
         self.assertEqual(m['musicbrainz_recordingid'], 'bef3fddb-5aca-49f5-b2fd-d56a23268d63')
         self.assertEqual(m['musicbrainz_trackid'], 'd4156411-b884-368f-a4cb-7c0101a557a2')
         self.assertEqual(m['title'], 'Speak to Me')
-        self.assertEqual(m['~length'], '1:08')
+        self.assertEqual(m['~length'], '1m08s')
         self.assertEqual(m['tracknumber'], '1')
         self.assertEqual(m['~musicbrainz_tracknumber'], 'A1')
         self.assertEqual(m['~recordingcomment'], 'original stereo mix')

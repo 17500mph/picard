@@ -62,6 +62,7 @@ from picard.ui.infodialog import (
     FileInfoDialog,
     TrackInfoDialog,
 )
+#amd Scripts Menu Access (Static Menu/Not Dynamic)
 from picard.ui.scriptsmenu import ScriptsMenu
 from picard.ui.infostatus import InfoStatus
 from picard.ui.itemviews import MainPanel

@@ -63,6 +63,26 @@ class SanitizeDateTest(PicardTestCase):
         self.assertNotEqual(util.sanitize_date("2006.03.02"), "2006-03-02")
 
 
+class SanitizeFilenameTest(PicardTestCase):
+
+    def test_replace_slashes(self):
+        self.assertEqual(util.sanitize_filename("AC/DC"), "AC_DC")
+
+    def test_custom_replacement(self):
+        self.assertEqual(util.sanitize_filename("AC/DC", "|"), "AC|DC")
+
+    def test_win_compat(self):
+        self.assertEqual(util.sanitize_filename("AC\\/DC", win_compat=True), "AC__DC")
+
+    @unittest.skipUnless(IS_WIN, "windows test")
+    def test_replace_backslashes(self):
+        self.assertEqual(util.sanitize_filename("AC\\DC"), "AC_DC")
+
+    @unittest.skipIf(IS_WIN, "non-windows test")
+    def test_keep_backslashes(self):
+        self.assertEqual(util.sanitize_filename("AC\\DC"), "AC\\DC")
+
+
 class TranslateArtistTest(PicardTestCase):
 
     def test_latin(self):
@@ -88,14 +108,14 @@ class TranslateArtistTest(PicardTestCase):
 class FormatTimeTest(PicardTestCase):
 
     def test(self):
-        self.assertEqual("?:??", util.format_time(0))
-        self.assertEqual("0:00", util.format_time(0, display_zero=True))
-        self.assertEqual("3:00", util.format_time(179750))
-        self.assertEqual("3:00", util.format_time(179500))
-        self.assertEqual("2:59", util.format_time(179499))
-        self.assertEqual("59:59", util.format_time(3599499))
-        self.assertEqual("1:00:00", util.format_time(3599500))
-        self.assertEqual("1:02:59", util.format_time(3779499))
+        self.assertEqual("?m??s", util.format_time(0))
+        self.assertEqual("0m00s", util.format_time(0, display_zero=True))
+        self.assertEqual("3m00s", util.format_time(179750))
+        self.assertEqual("3m00s", util.format_time(179500))
+        self.assertEqual("2m59s", util.format_time(179499))
+        self.assertEqual("59m59s", util.format_time(3599499))
+        self.assertEqual("1h00m00s", util.format_time(3599500))
+        self.assertEqual("1h02m59s", util.format_time(3779499))
 
 
 class HiddenFileTest(PicardTestCase):

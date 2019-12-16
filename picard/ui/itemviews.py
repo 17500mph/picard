@@ -149,8 +149,8 @@ class MainPanel(QtWidgets.QSplitter):
         (N_('Format'), '~format'),#amd
         (N_('Path'), '~dirname'),#amd
         (N_('File'), '~filename'),#amd
-
     ]
+
     def __init__(self, window, parent=None):
         super().__init__(parent)
         self.window = window
