@@ -37,6 +37,12 @@ from picard.util import (
     icontheme,
 )
 
+from picard.ui.widgets import (
+    ClickableSlider,
+    ElidedLabel,
+    SliderPopover,
+)
+
 
 try:
     from PyQt5 import QtMultimedia
@@ -235,10 +241,6 @@ class PlayerToolbar(QtWidgets.QToolBar):
         self.playback_rate_button.setToolButtonStyle(style)
         self.volume_button.setToolButtonStyle(style)
 
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        self.progress_widget.resize_media_name()
-
     def showEvent(self, event):
         super().showEvent(event)
         self._update_popover_position()
@@ -259,24 +261,10 @@ class PlayerToolbar(QtWidgets.QToolBar):
             return 'top'
 
 
-class ClickableSlider(QtWidgets.QSlider):
-    def mousePressEvent(self, event):
-        self._set_position_from_mouse_event(event)
-
-    def mouseMoveEvent(self, event):
-        self._set_position_from_mouse_event(event)
-
-    def _set_position_from_mouse_event(self, event):
-        value = QtWidgets.QStyle.sliderValueFromPosition(
-            self.minimum(), self.maximum(), event.x(), self.width())
-        self.setValue(value)
-
-
 class PlaybackProgressSlider(QtWidgets.QWidget):
     def __init__(self, parent, player):
         super().__init__(parent)
         self.player = player
-        self.media_name = ''
         self._position_update = False
 
         tool_font = QtWidgets.QApplication.font("QToolButton")
@@ -288,7 +276,7 @@ class PlaybackProgressSlider(QtWidgets.QWidget):
         self.progress_slider.setSingleStep(1000)
         self.progress_slider.setPageStep(3000)
         self.progress_slider.valueChanged.connect(self.on_value_changed)
-        self.media_name_label = QtWidgets.QLabel(self)
+        self.media_name_label = ElidedLabel(self)
         self.media_name_label.setAlignment(QtCore.Qt.AlignCenter)
         self.media_name_label.setFont(tool_font)
 
@@ -330,73 +318,12 @@ class PlaybackProgressSlider(QtWidgets.QWidget):
             self.progress_slider.setEnabled(False)
         else:
             url = media.canonicalUrl().toString()
-            self.set_media_name(os.path.basename(url))
+            self.media_name_label.setText(os.path.basename(url))
             self.progress_slider.setEnabled(True)
 
     def on_value_changed(self, value):
         if not self._position_update:  # Avoid circular events
             self.player.set_position(value)
-
-    def set_media_name(self, media_name):
-        self.media_name = media_name
-        media_label = self.media_name_label
-        metrics = QtGui.QFontMetrics(media_label.font())
-        elidedText = metrics.elidedText(media_name,
-                                        QtCore.Qt.ElideRight,
-                                        media_label.width())
-        media_label.setText(elidedText)
-
-    def resize_media_name(self):
-        self.set_media_name(self.media_name)
-
-
-class Popover(QtWidgets.QFrame):
-    def __init__(self, parent, position='bottom'):
-        super().__init__(parent)
-        self.setWindowFlags(QtCore.Qt.Popup | QtCore.Qt.FramelessWindowHint)
-        self.position = position
-
-    def show(self):
-        super().show()
-        self.update_position()
-
-    def update_position(self):
-        parent = self.parent()
-        x = -(self.width() - parent.width()) / 2
-        if self.position == 'top':
-            y = -self.height()
-        else:  # bottom
-            y = parent.height()
-        pos = parent.mapToGlobal(QtCore.QPoint(x, y))
-        screen_number = QtWidgets.QApplication.desktop().screenNumber()
-        screen = QtGui.QGuiApplication.screens()[screen_number]
-        screen_size = screen.availableVirtualSize()
-        if pos.x() < 0:
-            pos.setX(0)
-        if pos.x() + self.width() > screen_size.width():
-            pos.setX(screen_size.width() - self.width())
-        if pos.y() < 0:
-            pos.setY(0)
-        if pos.y() + self.height() > screen_size.height():
-            pos.setY(screen_size.height() - self.height())
-        self.move(pos)
-
-
-class SliderPopover(Popover):
-    value_changed = QtCore.pyqtSignal(int)
-
-    def __init__(self, parent, position, label, value):
-        super().__init__(parent, position)
-        vbox = QtWidgets.QVBoxLayout(self)
-        self.label = QtWidgets.QLabel(label, self)
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        vbox.addWidget(self.label)
-
-        self.slider = QtWidgets.QSlider(self)
-        self.slider.setOrientation(QtCore.Qt.Horizontal)
-        self.slider.setValue(value)
-        self.slider.valueChanged.connect(self.value_changed)
-        vbox.addWidget(self.slider)
 
 
 class PlaybackRateButton(QtWidgets.QToolButton):

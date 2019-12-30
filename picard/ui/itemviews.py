@@ -62,6 +62,7 @@ from picard.ui.collectionmenu import CollectionMenu
 from picard.ui.colors import interface_colors
 from picard.ui.ratingwidget import RatingWidget
 from picard.ui.scriptsmenu import ScriptsMenu
+from picard.ui.widgets.tristatesortheaderview import TristateSortHeaderView
 
 
 class BaseAction(QtWidgets.QAction):
@@ -255,7 +256,7 @@ class MainPanel(QtWidgets.QSplitter):
             self.update_current_view()
 
 
-class ConfigurableColumnsHeader(QtWidgets.QHeaderView):
+class ConfigurableColumnsHeader(TristateSortHeaderView):
 
     def __init__(self, parent=None):
         super().__init__(QtCore.Qt.Horizontal, parent)
@@ -299,7 +300,7 @@ class ConfigurableColumnsHeader(QtWidgets.QHeaderView):
         for i, column in enumerate(MainPanel.columns):
             if i == 0:
                 continue
-            action = QtWidgets.QAction(column[0], self.parent())
+            action = QtWidgets.QAction(_(column[0]), self.parent())
             action.setCheckable(True)
             action.setChecked(i in self._visible_columns)
             action.triggered.connect(partial(self.show_column, i))
@@ -414,7 +415,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
             loading.setDisabled(True)
             bottom_separator = True
 
-            if len(self.selectedIndexes()) == len(MainPanel.columns):
+            if len(self.selectedItems()) == 1:
                 def _add_other_versions():
                     releases_menu.removeAction(loading)
                     heading = releases_menu.addAction(obj.release_group.version_headings)
@@ -537,12 +538,13 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         header = self.header()
         if header_state:
             header.restoreState(header_state)
-            for i in range(0, self.columnCount() - 1):
+            for i in range(0, self.columnCount()):
                 header.show_column(i, not self.isColumnHidden(i))
         else:
             header.update_visible_columns([0, 1, 2])
             for i, size in enumerate([250, 50, 100]):
                 header.resizeSection(i, size)
+            self.sortByColumn(-1, QtCore.Qt.AscendingOrder)
 
     def supportedDropActions(self):
         return QtCore.Qt.CopyAction | QtCore.Qt.MoveAction
@@ -722,7 +724,11 @@ class AlbumTreeView(BaseTreeView):
         self.tagger.album_removed.connect(self.remove_album)
 
     def add_album(self, album):
-        item = AlbumItem(album, True, self)
+        if isinstance(album, NatAlbum):
+            item = NatAlbumItem(album, True)
+            self.insertTopLevelItem(0, item)
+        else:
+            item = AlbumItem(album, True, self)
         item.setIcon(0, AlbumItem.icon_cd)
         for i, column in enumerate(MainPanel.columns):
             font = item.font(i)
@@ -853,6 +859,19 @@ class AlbumItem(TreeItem):
         # Workaround for PICARD-1446: Expand/collapse indicator for the release
         # is briefly missing on Windows
         self.emitDataChanged()
+
+    def __lt__(self, other):
+        # Always show NAT entry on top, see also NatAlbumItem.__lt__
+        if isinstance(other, NatAlbumItem):
+            return not other.__lt__(self)
+        return super().__lt__(other)
+
+
+class NatAlbumItem(AlbumItem):
+    def __lt__(self, other):
+        # Always show NAT entry on top
+        order = self.treeWidget().header().sortIndicatorOrder()
+        return order == QtCore.Qt.AscendingOrder
 
 
 class TrackItem(TreeItem):

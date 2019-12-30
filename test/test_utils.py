@@ -63,6 +63,26 @@ class SanitizeDateTest(PicardTestCase):
         self.assertNotEqual(util.sanitize_date("2006.03.02"), "2006-03-02")
 
 
+class SanitizeFilenameTest(PicardTestCase):
+
+    def test_replace_slashes(self):
+        self.assertEqual(util.sanitize_filename("AC/DC"), "AC_DC")
+
+    def test_custom_replacement(self):
+        self.assertEqual(util.sanitize_filename("AC/DC", "|"), "AC|DC")
+
+    def test_win_compat(self):
+        self.assertEqual(util.sanitize_filename("AC\\/DC", win_compat=True), "AC__DC")
+
+    @unittest.skipUnless(IS_WIN, "windows test")
+    def test_replace_backslashes(self):
+        self.assertEqual(util.sanitize_filename("AC\\DC"), "AC_DC")
+
+    @unittest.skipIf(IS_WIN, "non-windows test")
+    def test_keep_backslashes(self):
+        self.assertEqual(util.sanitize_filename("AC\\DC"), "AC\\DC")
+
+
 class TranslateArtistTest(PicardTestCase):
 
     def test_latin(self):
@@ -114,6 +134,7 @@ class TagsTest(PicardTestCase):
         self.assertEqual(dtn('tag'), 'tag')
         self.assertEqual(dtn('tag:desc'), 'tag [desc]')
         self.assertEqual(dtn('tag:'), 'tag')
+        self.assertEqual(dtn('tag:de:sc'), 'tag [de:sc]')
         self.assertEqual(dtn('originalyear'), 'Original Year')
         self.assertEqual(dtn('originalyear:desc'), 'Original Year [desc]')
         self.assertEqual(dtn('~length'), 'Length')

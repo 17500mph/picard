@@ -162,9 +162,8 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         if not self.show_cover_art_action.isChecked():
             self.cover_art_box.hide()
 
-        self.logDialog = LogView(self)
-        self.historyDialog = HistoryView(self)
-        self.optionsDialog = None
+        self.log_dialog = LogView(self)
+        self.history_dialog = HistoryView(self)
 
         bottomLayout = QtWidgets.QHBoxLayout()
         bottomLayout.setContentsMargins(0, 0, 0, 0)
@@ -252,6 +251,8 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         config.persist["window_state"] = self.saveState()
         isMaximized = int(self.windowState()) & QtCore.Qt.WindowMaximized != 0
         self.save_geometry()
+        self.log_dialog.save_geometry()
+        self.history_dialog.save_geometry()
         config.persist["window_maximized"] = isMaximized
         config.persist["view_cover_art"] = self.show_cover_art_action.isChecked()
         config.persist["view_toolbar"] = self.show_toolbar_action.isChecked()
@@ -905,28 +906,20 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         self.show_options("about")
 
     def show_options(self, page=None):
-        if not self.optionsDialog:
-            self.optionsDialog = OptionsDialog(page, self)
-            self.optionsDialog.finished.connect(self.on_options_closed)
-        self.optionsDialog.show()
-        self.optionsDialog.raise_()
-        self.optionsDialog.activateWindow()
-
-    def on_options_closed(self):
-        self.optionsDialog = None
+        OptionsDialog.show_instance(page, self)
 
     def show_help(self):
         webbrowser2.goto('documentation')
 
     def show_log(self):
-        self.logDialog.show()
-        self.logDialog.raise_()
-        self.logDialog.activateWindow()
+        self.log_dialog.show()
+        self.log_dialog.raise_()
+        self.log_dialog.activateWindow()
 
     def show_history(self):
-        self.historyDialog.show()
-        self.historyDialog.raise_()
-        self.historyDialog.activateWindow()
+        self.history_dialog.show()
+        self.history_dialog.raise_()
+        self.history_dialog.activateWindow()
 
     def open_bug_report(self):
         webbrowser2.goto('troubleshooting')
