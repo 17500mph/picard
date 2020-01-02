@@ -106,8 +106,8 @@ TAG_NAMES = {
     'website': N_('Artist Website'),
     'work': N_('Work'),
     'writer': N_('Writer'),
-	#amd Added Tags (and `~filesize)
-	'genresort': N_('Genre Sort'),
+    # amd Added Tags (and `~filesize)
+    'genresort': N_('Genre Sort'),
 }
 
 PRESERVED_TAGS = (
@@ -120,7 +120,7 @@ PRESERVED_TAGS = (
     '~format',
     '~sample_rate',
     '~video',
-	'~filesize',
+    '~filesize',  # amd
 )
 
 

@@ -46,16 +46,15 @@ from picard.ui.options import (
     OptionsPage,
     register_options_page,
 )
-from picard.ui.options.scripting import TaggerScriptSyntaxHighlighter
+from picard.ui.options.scripting import (
+    ScriptCheckError,
+    TaggerScriptSyntaxHighlighter,
+)
 from picard.ui.ui_options_renaming import Ui_RenamingOptionsPage
 from picard.ui.util import enabledSlot
 
 
 _default_music_dir = QStandardPaths.writableLocation(QStandardPaths.MusicLocation)
-
-
-class ScriptCheckError(OptionsCheckError):
-    pass
 
 
 class RenamingOptionsPage(OptionsPage):
@@ -261,7 +260,7 @@ class RenamingOptionsPage(OptionsPage):
         file.metadata['catalognumber'] = 'M8541'
         file.metadata['releasecountry'] = 'US'
         file.metadata['~extension'] = 'mp3'
-        file.metadata['~length'] = '4_20'
+        file.metadata['~length'] = '4:20'
         file.metadata['bitrate'] = '256.0'
         file.metadata['sample_rate'] = '44100'
         file.metadata['channels'] = '2'

@@ -87,7 +87,7 @@ class TagCounter(dict):
         missing = self.parent.objects - count
 
         if tag in self.different:
-            return (ngettext("(%d item difference)", "(%d item differences)", count) % count, True)
+            return (ngettext("(different across %d item)", "(different across %d items)", count) % count, True)
         else:
             if tag == "~length":
                 msg = format_time(self.get(tag, 0))

@@ -22,16 +22,18 @@ PLUGIN_AUTHOR = "Philipp Wolfer"
 PLUGIN_DESCRIPTION = ("Allows loading selected tracks as non-album tracks. "
                       "Useful for tagging single tracks where you do not care "
                       "about the album.")
-PLUGIN_VERSION = "0.3"
+PLUGIN_VERSION = "0.4"
 PLUGIN_API_VERSIONS = ["1.4.0", "2.0", "2.1", "2.2"]
 PLUGIN_LICENSE = "GPL-2.0-or-later"
 PLUGIN_LICENSE_URL = "https://www.gnu.org/licenses/gpl-2.0.html"
 
 from picard import log
 from picard.track import Track
+from picard.album import Album
 from picard.ui.itemviews import (
     BaseAction,
     register_track_action,
+    register_album_action,
 )
 
 
@@ -39,7 +41,7 @@ class LoadAsNat(BaseAction):
     NAME = "Load as non-album track..."
 
     def callback(self, objs):
-        tracks = [t for t in objs if isinstance(t, Track)]
+        tracks = [t for t in objs if isinstance(t, Track, Album)]
 
         if len(tracks) == 0:
             return
@@ -73,3 +75,4 @@ class LoadAsNat(BaseAction):
 
 
 register_track_action(LoadAsNat())
+register_album_action(LoadAsNat())

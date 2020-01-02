@@ -108,14 +108,14 @@ class TranslateArtistTest(PicardTestCase):
 class FormatTimeTest(PicardTestCase):
 
     def test(self):
-        self.assertEqual("?m??s", util.format_time(0))
-        self.assertEqual("0m00s", util.format_time(0, display_zero=True))
-        self.assertEqual("3m00s", util.format_time(179750))
-        self.assertEqual("3m00s", util.format_time(179500))
-        self.assertEqual("2m59s", util.format_time(179499))
-        self.assertEqual("59m59s", util.format_time(3599499))
-        self.assertEqual("1h00m00s", util.format_time(3599500))
-        self.assertEqual("1h02m59s", util.format_time(3779499))
+        self.assertEqual("?:??", util.format_time(0))
+        self.assertEqual("0:00", util.format_time(0, display_zero=True))
+        self.assertEqual("3:00", util.format_time(179750))
+        self.assertEqual("3:00", util.format_time(179500))
+        self.assertEqual("2:59", util.format_time(179499))
+        self.assertEqual("59:59", util.format_time(3599499))
+        self.assertEqual("1:00:00", util.format_time(3599500))
+        self.assertEqual("1:02:59", util.format_time(3779499))
 
 
 class HiddenFileTest(PicardTestCase):

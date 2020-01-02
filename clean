@@ -1,0 +1,7 @@
+#!/bin/sh
+
+python3 setup.py build_ui
+python3 setup.py regen_pot_file && git diff --quiet || git commit -m 'Update pot file' -- po/picard.pot
+git ls-tree --full-tree -r HEAD --name-only |while read f; do sed -i '1s/^\xEF\xBB\xBF//' "$f"; done && git diff --quiet || git commit -a -m 'Remove nasty BOM bytes'
+python3 setup.py update_constants && git diff --quiet || git commit -a -m 'Update constants' -- picard/const/*.py
+

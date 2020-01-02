@@ -305,7 +305,7 @@ class File(QtCore.QObject, Item):
             length = self.orig_metadata.length
             temp_info = {}
             for info in ('~bitrate', '~sample_rate', '~channels',
-                         '~bits_per_sample', '~format', '~filesize'):
+                         '~bits_per_sample', '~format', '~filesize'):#amd
                 temp_info[info] = self.orig_metadata[info]
             # Data is copied from New to Original because New may be
             # a subclass to handle id3v23
@@ -424,7 +424,7 @@ class File(QtCore.QObject, Item):
         if old_filename == new_filename + ext:
             return old_filename
 
-        tmp_directory, tmp_filename = os.path.split(new_filename)
+        tmp_directory, tmp_filename = os.path.split(new_filename) #amd
         new_directory = tmp_directory
         i = 0
         file_found = True
@@ -437,7 +437,7 @@ class File(QtCore.QObject, Item):
                 new_directory = "%s (%d)" % (tmp_directory, i)
                 new_filename = os.path.join(new_directory, tmp_filename)
             else:
-                file_found = False
+                file_found = False #amd
 
         new_filename = new_filename + ext
         log.debug("Moving file %r => %r", old_filename, new_filename)
@@ -491,7 +491,7 @@ class File(QtCore.QObject, Item):
         new_path = os.path.dirname(new_filename)
         old_path = os.path.dirname(old_filename)
         if new_path == old_path:
-            # skip, same directory, nothing to move
+            # skip, same directory, nothing to move
             return
         patterns = config.setting["move_additional_files_pattern"]
         pattern_regexes = set()
@@ -653,7 +653,7 @@ class File(QtCore.QObject, Item):
         filename, extension = os.path.splitext(os.path.basename(self.filename))
         metadata['~filename'] = filename
         metadata['~extension'] = extension.lower()[1:]
-        metadata['~filesize'] = os.path.getsize(self.filename)
+        metadata['~filesize'] = os.path.getsize(self.filename) # amd
 
     @property
     def state(self):

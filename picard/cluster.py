@@ -66,7 +66,7 @@ class Cluster(QtCore.QObject, Item):
         QtCore.QObject.__init__(self)
         self.item = None
         self.metadata = Metadata()
-        self.orig_metadata = Metadata()
+        self.orig_metadata = Metadata() #amd
         self.metadata['album'] = name
         self.metadata['albumartist'] = artist
         self.metadata['totaltracks'] = 0
@@ -175,11 +175,11 @@ class Cluster(QtCore.QObject, Item):
 
     def column(self, column):
         if column == 'title':
-            return '%s' % (self.metadata['album'])
+            return '%s' % (self.metadata['album']) # amd
         elif column == 'matchedtracks':
             return '%d' % (len(self.files))
         elif column == 'albumtracks':
-            return self.metadata['albumtracks']
+            return self.metadata['albumtracks'] #amd
         elif (column == '~length' and self.special) or column == 'album':
             return ''
         elif column == '~length':

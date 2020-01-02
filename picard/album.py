@@ -64,7 +64,7 @@ from picard.util import (
     find_best_match,
     format_time,
     mbid_validate,
-)
+    bytes2human) # amd
 from picard.util.imagelist import (
     add_metadata_images,
     remove_metadata_images,
@@ -602,41 +602,22 @@ class Album(DataObject, Item):
                     count += 1
         return count
 
-    def column(self, column, size=0):
+    def column(self, column):
         if column == 'title':
             if self.status is not None:
                 title = self.status
             else:
                 title = self.metadata['album']
             if self.tracks:
-                linked_tracks = 0
-                for track in self.tracks:
-                    if track.is_linked():
-                        linked_tracks += 1
-
-                #text = title
-#                text = '%s\u200E (%d/%d' % (title, linked_tracks, len(self.tracks))
-                text = '%s\u200E' % (title)
-
                 #text = '%s\u200E (%d/%d' % (title, linked_tracks, len(self.tracks))
-
-                # CoverArt.set_metadata uses the orig_metadata.images if metadata.images is empty
-                # in order to show existing cover art if there's no cover art for a release. So
-                # we do the same here in order to show the number of images consistently.
-                if self.metadata.images:
-                    metadata = self.metadata
-                else:
-                    metadata = self.orig_metadata
-
-                number_of_images = len(metadata.images)
-                if getattr(metadata, 'has_common_images', True):
-                   text += " "
-                else:
-                    text += ngettext("(%i image not in all tracks)", "(%i different images among tracks)",
-                                     number_of_images) % number_of_images
+                #text = '%s\u200E'
+                text = self.metadata['album']
                 return text
             else:
                 return title
+
+        elif column == 'artist':
+            return self.metadata['albumartist']
 
         elif column == 'catalognumber':
             return self.metadata['catalognumber']
@@ -663,12 +644,25 @@ class Album(DataObject, Item):
                 # text = '%d' % (linked_tracks)
                 return text
 
+        elif column == 'status':
+            if self.status is not None:
+                title = self.status
+            else:
+                title = self.metadata['status']
+            if self.tracks:
+                linked_tracks = 0
+                for track in self.tracks:
+                    if track.is_linked():
+                        linked_tracks += 1
+
+                text = '%s\u200E' % (title)
+                return text
+
         elif column == '~completed':
             trackcount = len(self.tracks)
             if not trackcount:
                 return ''
             return '{:03.0f}%'.format(self.get_num_matched_tracks() / trackcount * 100)
-
 
         elif column == '~filesize':
             totalsize = sum(f.metadata.filesize for f in self.iterfiles())
@@ -736,8 +730,6 @@ class Album(DataObject, Item):
 
         else:
             return ''
-
-
 
 # amd: Visible Columns 0 vs. what's in the Plugin Wedge. (Columns populated on both panes are coded, others are left to the plugin for now..
 #            unmatched = self.get_num_unmatched_files()

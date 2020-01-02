@@ -121,3 +121,6 @@ class ApiseedsLyricsOptionsPage(OptionsPage):
 
 register_track_metadata_processor(ApiseedsLyricsMetadataProcessor().process_metadata)
 register_options_page(ApiseedsLyricsOptionsPage)
+
+
+register_album_action

@@ -20,11 +20,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from collections import defaultdict
+import os.path
 
 from picard import (
     config,
     log,
 )
+from picard.const import USER_PLUGIN_DIR
 
 
 _PLUGIN_MODULE_PREFIX = "picard.plugins."
@@ -92,7 +94,7 @@ class PluginWrapper(PluginShared):
         super().__init__()
         self.module = module
         self.compatible = False
-        self.dir = plugindir
+        self.dir = os.path.normpath(plugindir)
         self._file = file
         self.data = manifest_data or self.module.__dict__
 
@@ -162,6 +164,10 @@ class PluginWrapper(PluginShared):
     @property
     def files_list(self):
         return self.file[len(self.dir)+1:]
+
+    @property
+    def is_user_installed(self):
+        return self.dir == USER_PLUGIN_DIR
 
 
 class PluginData(PluginShared):

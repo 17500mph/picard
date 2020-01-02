@@ -62,8 +62,7 @@ from picard.ui.infodialog import (
     FileInfoDialog,
     TrackInfoDialog,
 )
-#amd Scripts Menu Access (Static Menu/Not Dynamic)
-from picard.ui.scriptsmenu import ScriptsMenu
+from picard.ui.scriptsmenu import ScriptsMenu  #  amd To Add Scripts Menu
 from picard.ui.infostatus import InfoStatus
 from picard.ui.itemviews import MainPanel
 from picard.ui.logview import (
@@ -675,9 +674,10 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         menu = self.menuBar().addMenu(_("&Functions"))
         menu.addSeparator()
         menu.addMenu(ScriptsMenu(scripts, _("&Run scripts"), menu))
+        menu.addMenu(QtWidgets.QMenu(_("P&lugins"), menu))
+        menu.addAction(self.album_search_action)
         menu.addSeparator()
         menu.addAction(self.options_action)
-
         menu = self.menuBar().addMenu(_("&Tools"))
         menu.addAction(self.refresh_action)
         menu.addAction(self.cd_lookup_action)

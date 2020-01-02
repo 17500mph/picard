@@ -125,15 +125,15 @@ class MainPanel(QtWidgets.QSplitter):
 
     columns = [
         (N_('Title'), 'title'),
-        (N_('Imgs.'), 'artcount'),#amd
+        (N_('Artwork.'), 'artcount'),#amd
         (N_('Matched'), 'matchedtracks'),#amd
-        (N_('NoMatch'), 'unmatchedtracks'),#amd
+        (N_('Unmatch'), 'unmatchedtracks'),#amd
         (N_('Tracks'), 'albumtracks'),#amd
         (N_('Completed'), '~completed'),#amd
-        (N_('To Save'), 'unsavedtracks'),#amd
+        (N_('Unsaved'), 'unsavedtracks'),#amd
         (N_('Length'), '~length'),
         (N_('Artist'), 'artist'),
-        (N_('Cat #'), 'catalognumber'),#amd
+        (N_('Cat No.'), 'catalognumber'),#amd
         (N_('Media'), 'media'),#amd
         (N_('Size'), '~filesize'),#amd
         (N_('Album Artist'), 'albumartist'),
@@ -145,7 +145,7 @@ class MainPanel(QtWidgets.QSplitter):
         (N_('Barcode'), 'barcode'),
         (N_('Genre'), 'genre'),
         (N_('Bitrate'), '~bitrate'),#amd
-        (N_('Ext'), '~extension'),#amd
+        (N_('Ext.'), '~extension'),#amd
         (N_('Format'), '~format'),#amd
         (N_('Path'), '~dirname'),#amd
         (N_('File'), '~filename'),#amd
@@ -427,7 +427,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
             loading.setDisabled(True)
             bottom_separator = True
 
-            if len(self.selectedIndexes()) == len(MainPanel.columns):
+            if len(self.selectedItems()) == 1:
                 def _add_other_versions():
                     releases_menu.removeAction(loading)
                     heading = releases_menu.addAction(obj.release_group.version_headings)
@@ -841,7 +841,7 @@ class AlbumItem(TreeItem):
             if newnum > oldnum:  # add new items
                 items = []
                 for i in range(newnum - 1, oldnum - 1, -1):  # insertChildren is backwards
-                    item = TrackItem(album.tracks[i], False)
+                    item = TrackItem(album.tracks[i], True)  # amd Column Sort Enable
                     item.setHidden(False)  # Workaround to make sure the parent state gets updated
                     items.append(item)
                 self.insertChildren(oldnum, items)
