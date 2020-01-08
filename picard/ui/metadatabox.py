@@ -484,6 +484,12 @@ class MetadataBox(QtWidgets.QTableWidget):
 
             tag_diff.add("~length",
                          str(orig_metadata.length), str(new_metadata.length), False)
+            tag_diff.add("~filesize",
+                         orig_metadata.getall("~filesize"), new_metadata.getall("~filesize"), False)
+            tag_diff.add("~filename",
+                         orig_metadata.getall("~filename"), new_metadata.getall("~filename"), False)
+            tag_diff.add("~dirname",
+                         orig_metadata.getall("~dirname"), new_metadata.getall("~dirname"), False)
 
         for track in tracks:
             if track.num_linked_files == 0:

@@ -43,9 +43,12 @@ TAG_NAMES = {
     'discnumber': N_('Disc Number'),
     'discsubtitle': N_('Disc Subtitle'),
     'djmixer': N_('DJ-Mixer'),
+    '~dirname': N_('Directory'), # amd
     'encodedby': N_('Encoded By'),
     'encodersettings': N_('Encoder Settings'),
     'engineer': N_('Engineer'),
+    '~filename': N_('Filename'),  # amd (N_name only added)
+    '~filesize': N_('Filesize'),  # amd (N_name only added)
     'genre': N_('Genre'),
     'grouping': N_('Grouping'),
     'isrc': N_('ISRC'),
@@ -106,8 +109,12 @@ TAG_NAMES = {
     'website': N_('Artist Website'),
     'work': N_('Work'),
     'writer': N_('Writer'),
-    # amd Added Tags (and `~filesize)
-    'genresort': N_('Genre Sort'),
+    'genresort': N_('Genre Sort'),  # amd
+    'originalfile': N_('Original File'),  # amd
+    'originalpath': N_('Original Path'),  # amd
+    'originaltitle': N_('Original Title'),  # amd
+    'originaltrack': N_('Original Track'),  # amd
+
 }
 
 PRESERVED_TAGS = (
