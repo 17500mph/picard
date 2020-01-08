@@ -229,7 +229,7 @@ class File(QtCore.QObject, Item):
             # https://docs.python.org/3/library/os.html#os.utime
             # Since Python 3.3, ns parameter is available
             # The best way to preserve exact times is to use the st_atime_ns and st_mtime_ns
-            # fields from the os.stat() result object with the ns parameter to utime.
+            # fields from the os.stat() result object with the ns parameter to utime.
             st = os.stat(filename)
         except OSError as why:
             errmsg = "Couldn't read timestamps from %r: %s" % (filename, why)
@@ -491,7 +491,7 @@ class File(QtCore.QObject, Item):
         new_path = os.path.dirname(new_filename)
         old_path = os.path.dirname(old_filename)
         if new_path == old_path:
-            # skip, same directory, nothing to move
+            # skip, same directory, nothing to move
             return
         patterns = config.setting["move_additional_files_pattern"]
         pattern_regexes = set()
@@ -549,7 +549,7 @@ class File(QtCore.QObject, Item):
                 self.parent.remove_file(self)
             self.parent = parent
             self.parent.add_file(self)
-            self._acoustid_update()
+            self.acoustid_update()
 
     def _move(self, parent):
         if parent != self.parent:
@@ -557,9 +557,9 @@ class File(QtCore.QObject, Item):
             if self.parent:
                 self.parent.remove_file(self)
             self.parent = parent
-            self._acoustid_update()
+            self.acoustid_update()
 
-    def _acoustid_update(self):
+    def acoustid_update(self):
         recording_id = None
         if self.parent and hasattr(self.parent, 'orig_metadata'):
             recording_id = self.parent.orig_metadata['musicbrainz_recordingid']
@@ -779,7 +779,7 @@ class File(QtCore.QObject, Item):
 
     def clear_pending(self):
         if self.state == File.PENDING:
-            self.state = File.NORMAL
+            self.state = File.NORMAL if self.similarity == 1.0 else File.CHANGED
             self.update_item()
 
     def update_item(self):

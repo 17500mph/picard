@@ -340,7 +340,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
             return hasattr(obj, 'keys') and hasattr(obj, '__getitem__')
 
         echo = kwargs.get('echo', log.debug)
-        # _ is defined using builtins.__dict__, so setting it as default named argument
+        # _ is defined using builtins.__dict__, so setting it as default named argument
         # value doesn't work as expected
         translate = kwargs.get('translate', _)
         timeout = kwargs.get('timeout', 0)
@@ -501,6 +501,12 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         # TR: Keyboard shortcut for "Analyze"
         self.analyze_action.setShortcut(QtGui.QKeySequence(_("Ctrl+Y")))
         self.analyze_action.triggered.connect(self.analyze)
+
+        self.generate_fingerprints_action = QtWidgets.QAction(icontheme.lookup('picard-fingerprint'), _("&Generate AcoustID fingerprints"), self)
+        self.generate_fingerprints_action.setStatusTip(_("Generate the AcoustID audio fingerprints for the selected files without doing a lookup"))
+        self.generate_fingerprints_action.setEnabled(False)
+        self.generate_fingerprints_action.setToolTip(_('Generate the AcoustID audio fingerprints for the selected files'))
+        self.generate_fingerprints_action.triggered.connect(self.generate_fingerprints)
 
         self.cluster_action = QtWidgets.QAction(icontheme.lookup('picard-cluster'), _("Cl&uster"), self)
         self.cluster_action.setStatusTip(_("Cluster files into album clusters"))
@@ -686,6 +692,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         menu.addAction(self.cluster_action)
         menu.addAction(self.browser_lookup_action)
         menu.addSeparator()
+        menu.addAction(self.generate_fingerprints_action)
         menu.addAction(self.tags_from_filenames_action)
         menu.addAction(self.open_collection_in_browser_action)
         self.menuBar().addSeparator()
@@ -956,6 +963,14 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
                 return
         return self.tagger.analyze(self.selected_objects)
 
+    def generate_fingerprints(self):
+        if not config.setting['fingerprinting_system']:
+            if self.show_analyze_settings_info():
+                self.show_options("fingerprinting")
+            if not config.setting['fingerprinting_system']:
+                return
+        return self.tagger.generate_fingerprints(self.selected_objects)
+
     def _openUrl(self, url):
         return QtCore.QUrl.fromLocalFile(url)
 
@@ -1053,6 +1068,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         self.save_action.setEnabled(can_save)
         self.view_info_action.setEnabled(can_view_info)
         self.analyze_action.setEnabled(can_analyze)
+        self.generate_fingerprints_action.setEnabled(have_files)
         self.refresh_action.setEnabled(can_refresh)
         self.autotag_action.setEnabled(can_autotag)
         self.browser_lookup_action.setEnabled(can_browser_lookup)
