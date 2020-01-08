@@ -625,6 +625,9 @@ class Album(DataObject, Item):
         elif column == 'media':
             return self.metadata['media']
 
+        elif column == 'genre':
+            return self.metadata['genre']
+
         elif column == '~length':
             length = self.metadata.length
             if length:

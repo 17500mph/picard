@@ -340,7 +340,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
             return hasattr(obj, 'keys') and hasattr(obj, '__getitem__')
 
         echo = kwargs.get('echo', log.debug)
-        # _ is defined using builtins.__dict__, so setting it as default named argument
+        # _ is defined using builtins.__dict__, so setting it as default named argument
         # value doesn't work as expected
         translate = kwargs.get('translate', _)
         timeout = kwargs.get('timeout', 0)
@@ -920,10 +920,10 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         self.tagger.activeWindow().close()
 
     def show_about(self):
-        self.show_options("about")
+        return self.show_options("about")
 
     def show_options(self, page=None):
-        OptionsDialog.show_instance(page, self)
+        return OptionsDialog.show_instance(page, self)
 
     def show_help(self):
         webbrowser2.goto('documentation')
@@ -956,20 +956,16 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         self.panel.remove(self.selected_objects)
 
     def analyze(self):
-        if not config.setting['fingerprinting_system']:
-            if self.show_analyze_settings_info():
-                self.show_options("fingerprinting")
-            if not config.setting['fingerprinting_system']:
-                return
-        return self.tagger.analyze(self.selected_objects)
+        def callback(fingerprinting_system):
+            if fingerprinting_system:
+                self.tagger.analyze(self.selected_objects)
+        self._ensure_fingerprinting_configured(callback)
 
     def generate_fingerprints(self):
-        if not config.setting['fingerprinting_system']:
-            if self.show_analyze_settings_info():
-                self.show_options("fingerprinting")
-            if not config.setting['fingerprinting_system']:
-                return
-        return self.tagger.generate_fingerprints(self.selected_objects)
+        def callback(fingerprinting_system):
+            if fingerprinting_system:
+                self.tagger.generate_fingerprints(self.selected_objects)
+        self._ensure_fingerprinting_configured(callback)
 
     def _openUrl(self, url):
         return QtCore.QUrl.fromLocalFile(url)
@@ -988,7 +984,17 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         for folder in folders:
             QtGui.QDesktopServices.openUrl(self._openUrl(folder))
 
-    def show_analyze_settings_info(self):
+    def _ensure_fingerprinting_configured(self, callback):
+        def on_finished(result):
+            callback(config.setting['fingerprinting_system'])
+        if not config.setting['fingerprinting_system']:
+            if self._show_analyze_settings_info():
+                dialog = self.show_options("fingerprinting")
+                dialog.finished.connect(on_finished)
+        else:
+            callback(config.setting['fingerprinting_system'])
+
+    def _show_analyze_settings_info(self):
         ret = QtWidgets.QMessageBox.question(self,
             _("Configuration Required"),
             _("Audio fingerprinting is not yet configured. Would you like to configure it now?"),

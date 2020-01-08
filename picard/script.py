@@ -759,7 +759,7 @@ def func_firstwords(parser, text, length):
 def func_startswith(parser, text, prefix):
     if text.startswith(prefix):
         return "1"
-    return "0" # amd "Wrong way for $if($eq"
+    return "0"  # amd "Wrong way for $if($eq"
 
 
 def func_endswith(parser, text, suffix):

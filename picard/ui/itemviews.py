@@ -125,30 +125,31 @@ class MainPanel(QtWidgets.QSplitter):
 
     columns = [
         (N_('Title'), 'title'),
-        (N_('Artwork.'), 'artcount'),#amd
-        (N_('Matched'), 'matchedtracks'),#amd
-        (N_('Unmatch'), 'unmatchedtracks'),#amd
-        (N_('Tracks'), 'albumtracks'),#amd
-        (N_('Completed'), '~completed'),#amd
-        (N_('Unsaved'), 'unsavedtracks'),#amd
+        (N_('Artwork.'), 'artcount'),  # amd
+        (N_('Matched'), 'matchedtracks'),  # amd
+        (N_('Unmatch'), 'unmatchedtracks'),  # amd
+        (N_('Tracks'), 'albumtracks'),  # amd
+        (N_('Completed'), '~completed'),  # amd
+        (N_('Unsaved'), 'unsavedtracks'),  # amd
         (N_('Length'), '~length'),
         (N_('Artist'), 'artist'),
-        (N_('Cat No.'), 'catalognumber'),#amd
-        (N_('Media'), 'media'),#amd
-        (N_('Size'), '~filesize'),#amd
+        (N_('Cat No.'), 'catalognumber'),  # amd
+        (N_('Size'), '~filesize'),  # amd
         (N_('Album Artist'), 'albumartist'),
         (N_('Composer'), 'composer'),
         (N_('Album'), 'album'),
         (N_('Disc Subtitle'), 'discsubtitle'),
         (N_('Track No.'), 'tracknumber'),
         (N_('Disc No.'), 'discnumber'),
+        (N_('Catalog No.'), 'catalognumber'),
         (N_('Barcode'), 'barcode'),
+        (N_('Media'), 'media'),
         (N_('Genre'), 'genre'),
-        (N_('Bitrate'), '~bitrate'),#amd
-        (N_('Ext.'), '~extension'),#amd
-        (N_('Format'), '~format'),#amd
-        (N_('Path'), '~dirname'),#amd
-        (N_('File'), '~filename'),#amd
+        (N_('Bitrate'), '~bitrate'),  # amd
+        (N_('Ext.'), '~extension'),  # amd
+        (N_('Format'), '~format'),  # amd
+        (N_('Path'), '~dirname'),  # amd
+        (N_('File'), '~filename'),  # amd
     ]
 
     def __init__(self, window, parent=None):
@@ -500,7 +501,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
             menu.addSeparator()
 
         # Using type here is intentional. isinstance will return true for the
-        # NatAlbum instance, which can't be part of a collection.
+        # NatAlbum instance, which can't be part of a collection.
         # pylint: disable=C0123
         selected_albums = [a for a in self.window.selected_objects if type(a) == Album]
         if selected_albums:
