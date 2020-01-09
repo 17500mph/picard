@@ -145,7 +145,10 @@ class ID3File(File):
         'TCMP': 'compilation',
         'TSOC': 'composersort',
         'TSO2': 'albumartistsort',
-        'MVNM': 'movement'
+        'MVNM': 'movement',
+        'TCAT': 'category',  # amd
+        'TKWD': 'keywords',  # amd
+        'PCST': 'podcast'  # amd
     }
     __rtranslate = dict([(v, k) for k, v in __translate.items()])
     __translate['GRP1'] = 'grouping'  # Always read, but writing depends on itunes_compatible_grouping

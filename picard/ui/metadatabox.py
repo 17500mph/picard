@@ -490,11 +490,13 @@ class MetadataBox(QtWidgets.QTableWidget):
 
             tag_diff.add("~length",
                          str(orig_metadata.length), str(new_metadata.length), False)
-            tag_diff.add("~filesize",  #amd
-                         orig_metadata.getall("~filesize"), new_metadata.getall("~filesize"), False)
-            tag_diff.add("~filename",  #amd
+            tag_diff.add("~filesize",  # amd
+                         str(orig_metadata.filesize), str(new_metadata.filesize), False)
+            # tag_diff.add("~filesize",  # amd
+            #             orig_metadata.getall("~filesize"), new_metadata.getall("~filesize"), False)
+            tag_diff.add("~filename",  # amd
                          orig_metadata.getall("~filename"), new_metadata.getall("~filename"), False)
-            tag_diff.add("~dirname",  #amd
+            tag_diff.add("~dirname",  # amd
                          orig_metadata.getall("~dirname"), new_metadata.getall("~dirname"), False)
 
         for track in tracks:

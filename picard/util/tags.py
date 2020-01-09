@@ -114,6 +114,10 @@ TAG_NAMES = {
     'originalpath': N_('Original Path'),  # amd
     'originaltitle': N_('Original Title'),  # amd
     'originaltrack': N_('Original Track'),  # amd
+    'subtitle': N_('Description (iTunes)'),  # amd
+    'category': 'Category (iTunes)',  # amd
+    'keywords': 'Keywords (iTunes)',  # amd
+    'podcast': 'Podcast (iTunes)',  # amd
 
 }
 

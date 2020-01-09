@@ -671,6 +671,15 @@ class Album(DataObject, Item):
             totalsize = sum(f.metadata.filesize for f in self.iterfiles())
             return "%s (%s)" % (bytes2human.decimal(totalsize), bytes2human.binary(totalsize))
 
+        elif column == '~length':
+            length = self.metadata.length
+            if length:
+                return format_time(length)
+            else:
+                return ''
+
+
+
         #size = os.path.getsize(encode_filename(file_.filename))
         #sizestr = "%s (%s)" % (bytes2human.decimal(size), bytes2human.binary(size))
         #info.append((_('Size:'), sizestr))
@@ -722,14 +731,18 @@ class Album(DataObject, Item):
                 text = ' (%d*)' % (unsaved,)
                 return text
 
-#        elif column == 'album':
-#            return self.metadata['album']
+        elif column == 'compilation':
+            return self.metadata['compilation']
 
-#        elif column == 'format':
-#            return self.metadata['format']
+        elif column == 'podcast':
+            return self.metadata['podcast']
 
-#        elif column == 'extension':
-#            return self.metadata['extension']
+        elif column == 'category':
+            return self.metadata['category']
+
+        elif column == 'extension':
+            return self.metadata['extension']
+
 
         else:
             return ''

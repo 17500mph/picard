@@ -145,11 +145,15 @@ class MainPanel(QtWidgets.QSplitter):
         (N_('Barcode'), 'barcode'),
         (N_('Media'), 'media'),
         (N_('Genre'), 'genre'),
+        (N_('Podcast'), 'podcast'),  # amd
+        (N_('Category'), 'category'),  # amd
         (N_('Bitrate'), '~bitrate'),  # amd
         (N_('Ext.'), '~extension'),  # amd
         (N_('Format'), '~format'),  # amd
         (N_('Path'), '~dirname'),  # amd
         (N_('File'), '~filename'),  # amd
+        (N_('Keywords'), 'keywords'),  # amd
+
     ]
 
     def __init__(self, window, parent=None):

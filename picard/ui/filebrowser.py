@@ -133,7 +133,7 @@ class FileBrowser(QtWidgets.QTreeView):
         indexes = self.selectedIndexes()
         if indexes:
             path = self.model.filePath(indexes[0])
-            config.persist["current_browser_path"] = os.path.normpath(path)
+            config.persist["current_browser_path"] = move_files_here_action.normpath(path)
 
     def restore_state(self):
         pass
